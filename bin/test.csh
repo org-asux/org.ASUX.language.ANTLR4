@@ -1,6 +1,13 @@
 #!/bin/tcsh -f
 
-source ./common.csh-source
+set HOMEFLDR="$0:h"
+if ( "${HOMEFLDR}" == "." || "${HOMEFLDR}" == "" ) then
+	chdir ..  ### Go to parent folder which should contain the 'bin' subfolder containing these .csh scripts.
+endif
+
+set HOMEFLDR="$cwd"
+
+source $HOMEFLDR/bin/common.csh-source
 
 ###============================================
 ###@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
