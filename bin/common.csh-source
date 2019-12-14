@@ -1,0 +1,34 @@
+#!/bin/false
+
+set JARFOLDER="/Users/development/dist"
+set ANTLRVERSION="4.7.2"
+set JAVAPKGNAME="org.ASUX.language"
+set JAVAPKG_ASPATH="org/ASUX/language" ### Java packagename in the form of a FILE/FOLDER Path.
+set JAVAPKG_SRCFLDR="./src/main/java/${JAVAPKG_ASPATH}"
+set GRAMMERNAMEPREFIX="YAMLANTLR4"
+
+###----------------------------
+### Do NOT touch the FOLLOWING.  Only set the above.
+set ANTLR4_COMPLETEJAR="${JARFOLDER}/antlr-${ANTLRVERSION}-complete.jar"
+set BUILDROOT="/var/build/org.asux-language-1.0"
+set COMPILEDJAVAFILE="YAMLANTLR4Parser.class"
+set MVNREPOHOME="~/.m2/repository"
+set PROJMVNINSTALLFOLDER="${MVNREPOHOME}/${JAVAPKG_ASPATH}"
+unset VERBOSE
+
+###============================================
+###@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+###============================================
+
+chdir ..   ### Parent directory is the project root.
+
+if ( ! -e "./pom*.xml" ) then
+	echo "This script $0 should be in the ./bin subfolder of the project, whose home/root folder should contain POM*.xml files" >& /dev/stderr
+	exit 3
+endif
+
+###============================================
+###@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+###============================================
+
+### EoScript
