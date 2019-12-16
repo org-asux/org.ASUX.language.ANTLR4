@@ -109,13 +109,60 @@ public class MyYAMLParserVisitor extends YAMLANTLR4ParserBaseVisitor<String> {
     // {
     //     if(context.parent instanceof YAMLANTLR4Parser.JsonelemContext) // !!!!!!!!!!!!!!! whether parent is also a jsonElement... does this make any sense???????????
     //     {
-    //         if(context.content() != null)            
-    //             System.out.print(visitContent(context.content()));            
+    //         if(context.content() != null)
+    //             System.out.print(visitContent(context.content()));
     //         if(context.tag() != null)
     //             System.out.print(visitTag(context.tag()));
-    //     }    
+    //     }
     //     return null;
     // }
+
+    //==============================================================================
+    //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+    //==============================================================================
+
+    // @Override
+    // public String visitTag(MarkupParser.TagContext context)
+    // {
+    //     String text = "";
+    //     String startDelimiter = "", endDelimiter = "";
+    //     String id = context.ID(0).getText();
+    //     switch(id)
+    //     {
+    //         case "b":
+    //             startDelimiter = endDelimiter = "**";
+    //         break;
+    //         case "u":
+    //             startDelimiter = endDelimiter = "*";
+    //         break;
+    //         case "quote":
+    //             String attribute = context.attribute().STRING().getText();
+    //             attribute = attribute.substring(1,attribute.length()-1);
+    //             startDelimiter = System.lineSeparator() + "> ";
+    //             endDelimiter = System.lineSeparator() + "> " + System.lineSeparator() + "> – "
+    //                         + attribute + System.lineSeparator();
+    //         break;
+    //      } 
+    //     text += startDelimiter;
+    //     for (MarkupParser.ElementContext node: context.element())
+    //     {
+    //         if(node.tag() != null)
+    //             text += visitTag(node.tag());
+    //         if(node.content() != null)
+    //             text += visitContent(node.content());
+    //     }
+    //     text += endDelimiter;
+    //     return text;
+    // }
+
+    //==============================================================================
+    //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+    //==============================================================================
+
+    //==============================================================================
+    //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+    //==============================================================================
+
 
 
     public static void main(String[] a) {
