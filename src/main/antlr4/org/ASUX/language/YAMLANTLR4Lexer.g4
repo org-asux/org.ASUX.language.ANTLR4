@@ -152,16 +152,22 @@ FILEPATH : '/'? FILEPATHCHAR+ ( '/' FILEPATHCHAR+ )+ ;
 ANYWORD :	( UNICODECHAR | UNICODEDIGIT | UPPERCASE | LOWERCASE | [_.,:@%+-] ) +  ; 
 // ANYWORD :	( UNICODECHAR | UNICODEDIGIT | UPPERCASE | LOWERCASE | [_.,:;<>@%+{}\[\]-] ) +  ; 
 
-// !!!! WARNING !!!! Lexer-definition for 'SIMPLEWORD' should follow 'ANYWORD', as its a broader match.
-// NOTE: SIMPLEWORD matches __ONLY IF__ the preceding token is NOT a 'YAML_COMMAND'
+// ==================================
+// !!!! WARNING !!!! Lexer-definition for 'SIMPLEWORD' should follow 'ANYWORD', as 'SIMPLEWORD' matches almost everything.
+// So, added SEMANTIC-PREDICATE, so that SIMPLEWORD matches __ONLY IF__ the preceding token is NOT a 'YAML_COMMAND'
+// Ideally, AVOID semantic-predicates.. unless they canNOT be avoided.
+//	Instead, Choose to move the sematic-pred-LOGIC into the visitor-code and keep this grammer Language-INDEPendent!
 // NOTE: In java, '.getType()' is unnecessary for LA() invocation.
 // https://www.antlr.org/api/Java/org/antlr/v4/runtime/UnbufferedCharStream.html
 
 SIMPLEWORD : {_input.LA(1) !=  YAML_COMMAND}?
 	( UNICODECHAR | UNICODEDIGIT | UPPERCASE | LOWERCASE | [_.-] ) +  ; 
+// Above will match AlphaNumerics and the EQUIVALENT for Non-English Character-sets (in addition to '_', '-' and periods)
+// Typically, this is reserved for Semantic-concepts like 'Variable-names', 'AWS-YAML Keys', ..
 
 // ==================================
 // ATTENTION : 'NONQUOTEDTEXT' is among the MOST generic/loose token-definitions.  So, must be last.
+// It will allow __ANY__ NON-Alphanumeric string (bounded by white-space)
 
 NONQUOTEDTEXT    : CHAR_NONQUOTE_NONWS+?  ;  // will NOT allow a quote anywhere within this 'NONQUOTEDTEXT'
 // !! ATTENTION !!   The '?' Meta-char after a '+' implies NON-Greedy matching.
