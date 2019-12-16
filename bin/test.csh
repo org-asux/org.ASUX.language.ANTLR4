@@ -1,8 +1,21 @@
 #!/bin/tcsh -f
 
 set HOMEFLDR="$0:h"
+if ( "${HOMEFLDR}" == "$0" ) then
+	### TCSH Quirk:  this means '$0' is purely a simple file name with NO path-prefix (not even './')
+	set HOMEFLDR=""
+endif
+#__  echo "HOMEFLDR=[${HOMEFLDR}]"
+
 if ( "${HOMEFLDR}" == "." || "${HOMEFLDR}" == "" ) then
 	chdir ..  ### Go to parent folder which should contain the 'bin' subfolder containing these .csh scripts.
+else
+	if ( "${HOMEFLDR}" != "bin" && "${HOMEFLDR}" != "./bin" ) then
+		echo "Please run this command from the project Home folder only" >& /dev/stderr
+		exit 2
+	else
+		### good.  This command is being run from the Project's home folder.
+	endif
 endif
 
 set HOMEFLDR="$cwd"
@@ -14,8 +27,8 @@ source $HOMEFLDR/bin/common.csh-source
 ###============================================
 
 if ( $#argv <= 1 ) then
-    echo "Usage:	$0 <GrammarClassName> <startRule>  <inputFile>"	>>& /dev/stderr
-    echo "          $0 ${JAVAPKGNAME}.YAMLANTLR4     yaml_command  <user-input.filename>"	>>& /dev/stderr
+    echo "Usage:	$0 <GrammarClassName> <startRule>  <user-input.filename>"	>>& /dev/stderr
+    echo "	$0 ${JAVAPKGNAME}.YAMLANTLR4     yaml_commands  src/test/resources/user-input-YAML_commands.txt"	>>& /dev/stderr
     echo "  NOTE\!\!	2nd argument is the class's full package-name (__withOUT__ the Parser/Lexer suffix)"	>>& /dev/stderr
     echo "  OPTIONAL:  [-v]  [--verbose]  [-tokens]"	>>& /dev/stderr
     echo ''								>>& /dev/stderr

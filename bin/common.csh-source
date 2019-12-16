@@ -20,8 +20,8 @@ unset VERBOSE
 ###@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 ###============================================
 
-pwd
 if ( ! -e "./pom.xml" ) then
+	pwd
 	echo "This script $0 should be in the ./bin subfolder of the project, whose home/root folder should contain POM*.xml files" >& /dev/stderr
 	exit 3
 endif
