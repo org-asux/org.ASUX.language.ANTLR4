@@ -48,17 +48,24 @@ public class MyYAMLParserVisitor extends YAMLANTLR4ParserBaseVisitor<String> {
     private static final String HDR0 = MyYAMLParserVisitor.class.getName();
     public static final String CLASSNAME = HDR0;
 
-    //==============================================================================
-    //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-    //==============================================================================
-
-    // No default constructor needed - UNLESS .. in the future, I need to save information within instance-variables.
+    public boolean verbose = true;
 
     //==============================================================================
     //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
     //==============================================================================
 
-    /** Overrides default behavior and just dumping tokens to STDOUT */
+    public MyYAMLParserVisitor( final boolean _verbose ) {
+        this.verbose = _verbose;
+    }
+
+    //==============================================================================
+    //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+    //==============================================================================
+
+    /**
+     * {@inheritDoc}
+     * Overrides default behavior and just dumping tokens to STDOUT
+     */
     @Override
     public String visitYaml_command( YAMLANTLR4Parser.Yaml_commandContext _context ) {
         final String HDR = HDR0 + ".visitYaml_command(): ";
@@ -71,7 +78,10 @@ public class MyYAMLParserVisitor extends YAMLANTLR4ParserBaseVisitor<String> {
     //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
     //==============================================================================
 
-    /** Overrides default behavior - by NOT returning the Tokens, and instead returning the actual-text! */
+    /**
+     * {@inheritDoc}
+     * Overrides default behavior - by NOT returning the Tokens, and instead returning the actual-text!
+     */
     @Override
     public String visitYaml_command_read( YAMLANTLR4Parser.Yaml_command_readContext _context ) {
         final String HDR = HDR0 + ".visitYaml_command_read(): ";
@@ -80,7 +90,10 @@ public class MyYAMLParserVisitor extends YAMLANTLR4ParserBaseVisitor<String> {
         return super.visitYaml_command_read( _context );
     }
 
-    // /** Overrides default behavior - by NOT returning the Tokens, and instead returning the actual-text! */
+    // /**
+    //  * {@inheritDoc}
+    //  * Overrides default behavior - by NOT returning the Tokens, and instead returning the actual-text!
+    //  */
     // @Override
     // public String visitYaml_command_read( YAMLANTLR4Parser.Yaml_commandContext _context ) {
     //     return _context.getText();
@@ -90,7 +103,10 @@ public class MyYAMLParserVisitor extends YAMLANTLR4ParserBaseVisitor<String> {
     //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
     //==============================================================================
 
-    // /** prints all the text and ignores all the tags */
+    // /**
+    //  * {@inheritDoc}
+    //  * prints all the text and ignores all the tags
+    //  */
     // @Override
     // public String visitYaml_command( YAMLANTLR4Parser.Yaml_commandContext _context ) {
     //     System.out.print( _context.TEXT().getText() );
@@ -101,7 +117,9 @@ public class MyYAMLParserVisitor extends YAMLANTLR4ParserBaseVisitor<String> {
     //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
     //==============================================================================
 
-    // /** We have overridden the default-implementation of visitElement() so that .. <br>
+    // /**
+    //  * {@inheritDoc}
+    //  * We have overridden the default-implementation of visitElement() so that .. <br>
     //  * it prints the text of its child, but __ONLY IF__ it’s a top element, and NEVER inside a 'tag'.
     //  */
     // @Override
@@ -121,6 +139,9 @@ public class MyYAMLParserVisitor extends YAMLANTLR4ParserBaseVisitor<String> {
     //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
     //==============================================================================
 
+    // /**
+    //  * {@inheritDoc}
+    //  */
     // @Override
     // public String visitTag(MarkupParser.TagContext context)
     // {
