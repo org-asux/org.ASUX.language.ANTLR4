@@ -115,10 +115,10 @@ public class YAMLANTLR4ParserUtils {
      * <code>class OptionalsContext extends ParserRuleContext</code><br>
      * Many of my ASUX-YAML Parser constructs have heirarchy of parser-tokens (before we get to the Lexer-Tokens).  ALmost of my parser-constructs match just one Lexer-token, just that we do Not know which one.<br>
      * This method is a generic way to get the Lexer-token.<br>
+     * See <a href="https://www.antlr.org/api/Java/org/antlr/v4/runtime/ParserRuleContext.html">https://www.antlr.org/api/Java/org/antlr/v4/runtime/ParserRuleContext.html</a>
      * @param _prc NotNull instance obtained from top-level context object.
-     * @return NotNull ArrayList<String>, _EVEN IF_ something went wrong (in which case, you'll get a RuntimeException)
+     * @return NotNull ArrayList&lt;String&gt;, _EVEN IF_ something went wrong (in which case, you'll get a RuntimeException)
      * @throws RuntimeException typically this should lead to a bug-report
-     * @see https://www.antlr.org/api/Java/org/antlr/v4/runtime/ParserRuleContext.html
      */
     public ArrayList<String> toStrings( final ParserRuleContext _prc ) throws RuntimeException {
         final String HDR = HDR0 + ".toStrings(): ";
@@ -137,11 +137,12 @@ public class YAMLANTLR4ParserUtils {
 
     /**
      * For parsers that allow OPTIONAL-Cmdline 'arguments' a.k.a. 'OPTION' (example: --verbose) and for parsers that SHOULD be forgiving if user provides MULTIPLE instances of the same 'argument'..<br>
-     * this method will return the 'last' a.k.a. the RIGHTMOST occurence of this 'OPTION'.
+     * this method will return the 'last' a.k.a. the RIGHTMOST occurence of this 'OPTION'.<br>
+     * See <a href="https://www.antlr.org/api/Java/org/antlr/v4/runtime/ParserRuleContext.html">https://www.antlr.org/api/Java/org/antlr/v4/runtime/ParserRuleContext.html</a>
+     * @param <T> subclasses of https://www.antlr.org/api/Java/org/antlr/v4/runtime/Token.html
      * @param _tokenList NotNull
      * @return NotNull String, _EVEN IF_ something went wrong (in which case, you'll get a NoSuchElementException or a RuntimeException)
      * @throws java.util.NoSuchElementException if the _tokenList does Not contain any elements (is empty)
-     * @see https://www.antlr.org/api/Java/org/antlr/v4/runtime/ParserRuleContext.html
      */
     public <T extends Token> String getEffectiveTokenOption( final java.util.List<T> _tokenList ) throws java.util.NoSuchElementException {
         final String HDR = HDR0 + ".getEffectiveTokenOption<"+ _tokenList.getClass().getName() +">("+ _tokenList +"): ";
@@ -163,12 +164,12 @@ public class YAMLANTLR4ParserUtils {
 
     /**
      * For parsers that allow OPTIONAL-Cmdline 'arguments' a.k.a. 'OPTION' (example: --verbose) and for parsers that SHOULD be forgiving if user provides MULTIPLE instances of the same 'argument'..<br>
-     * this method will return the 'last' a.k.a. the RIGHTMOST occurence of this 'OPTION'.
-     * @param T Every Parser "token" will have a context, that will be sub-class of org.antlr.v4.runtime.ParserRuleContext
+     * this method will return the 'last' a.k.a. the RIGHTMOST occurence of this 'OPTION'.<br>
+     * See <a href="https://www.antlr.org/api/Java/org/antlr/v4/runtime/ParserRuleContext.html">https://www.antlr.org/api/Java/org/antlr/v4/runtime/ParserRuleContext.html</a>
+     * @param <T> Every Parser "token" will have a context, that will be sub-class of https://www.antlr.org/api/Java/org/antlr/v4/runtime/ParserRuleContext.html
      * @param _prcList NotNull
      * @return NotNull String, _EVEN IF_ something went wrong (in which case, you'll get a NoSuchElementException or a RuntimeException)
      * @throws java.util.NoSuchElementException if the _prcList does Not contain any elements (is empty)
-     * @see https://www.antlr.org/api/Java/org/antlr/v4/runtime/ParserRuleContext.html
      */
     public <T extends org.antlr.v4.runtime.ParserRuleContext>
         String getEffectiveOption( final java.util.List<T> _prcList ) throws java.util.NoSuchElementException
