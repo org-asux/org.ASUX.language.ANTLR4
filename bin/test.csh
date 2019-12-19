@@ -92,6 +92,13 @@ echo "about to run cmd-line test .."; sleep 2
 if ( $?VERBOSE) echo '\
 java  org.antlr.v4.gui.TestRig "$1" "$2" -tokens < "$3"'				>>& /dev/stderr
 java  org.antlr.v4.gui.TestRig "$1" "$2" -tokens < "$3" ### <GrammarName> <startRuleName> -tokens
+### org.antlr.v4.gui.TestRig OPTIONS: [-tokens] [-tree] [-gui] [-ps file.ps] [-encoding encodingname] [-trace] [-diagnostics] [-SLL]
+
+###----------------------------
+
+echo -n "generate PDF of the Abstract Syntax Tree? >> "; set ANS="$<"
+
+###----------------------------
 
 ### ASCII-based Tree output by PARSER
 if ( $?VERBOSE) echo '\
