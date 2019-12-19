@@ -61,46 +61,84 @@ public class MyErrorListener extends BaseErrorListener // org.antlr.v4.runtime.B
     //==============================================================================
     //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
     //==============================================================================
+    
+    public boolean verbose = true;
 
-    // private String _symbol = "";
+    private final MyYAMLParserListener listener;
+    private boolean bSyntaxError;
+    private String offendingSymbol = null;
     // private StringWriter _stream;
-    // public String getSymbol()       { return _symbol; } 
+    
+    //==============================================================================
+    //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+    //==============================================================================
+
+    public MyErrorListener(   final boolean _verbose
+                            , final MyYAMLParserListener _listener
+                            // , final StringWriter _stream
+                            ) {
+        this.verbose = _verbose;
+        this.listener = _listener;
+        this.bSyntaxError = false;
+        this.offendingSymbol = null;
+        //     this._stream = stream;
+    }
+
+    //==============================================================================
+    //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+    //==============================================================================
+
+    public boolean detectedSyntaxError()   { return this.bSyntaxError; } 
+    public String getOffendingSymbol()     { return this.offendingSymbol; } 
     // public StringWriter getStream() { return _stream; } 
 
     //==============================================================================
     //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
     //==============================================================================
 
-    // public MyErrorListener(StringWriter stream) {
-    //     this._stream = stream;
-    // }
-
-    //==============================================================================
-    //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-    //==============================================================================
-
-    /** Standard template code to use with any Language/Lexer/Parser */
+    /** 
+     * {@inheritDoc}
+     * Standard template code to use with any Language/Lexer/Parser
+     */
     @Override    
-	public void syntaxError( Recognizer<?, ?> recognizer,
-							Object offendingSymbol,
-							int line,
-							int charPositionInLine,
-							String msg,
-							RecognitionException e)
+	public void syntaxError( Recognizer<?, ?> _recognizer,
+							Object _offendingSymbol,
+							int _line,
+							int _charPositionInLine,
+							String _msg,
+							RecognitionException _e )
 	{
-        final String HDR = HDR0 + ".testYAMLReadCommand(): ";
+        final String HDR = HDR0 + ".syntaxError(): ";
 
-        System.out.println( HDR + msg );
-        // this._stream.write( msg );
-        // this._stream.write( System.getProperty("line.separator") );            
+        this.bSyntaxError = true;
 
-        if ( offendingSymbol.getClass().getName() == "org.antlr.v4.runtime.CommonToken" ) {            
-            CommonToken token = (CommonToken) offendingSymbol;
-            // this._symbol = token.getText();            
-            System.out.println( HDR + "token = "+ token.getText() );
-        }                
+        final String typeOfOffendingSymbol = _offendingSymbol.getClass().getName();
+        if ( this.verbose ) System.out.println( HDR + "_offendingSymbol's type = ["+ typeOfOffendingSymbol +"]" );
+
+
+    // if ( typeOfOffendingSymbol == "org.antlr.v4.runtime.CommonToken" ) {
+        if ( _offendingSymbol instanceof org.antlr.v4.runtime.CommonToken ) {
+            final CommonToken token = (CommonToken) _offendingSymbol;
+            // token.getText();      // see https://github.com/antlr/antlr4/blob/master/doc/faq/parse-trees.md#how-do-i-get-the-input-text-for-a-parse-tree-subtree
+            final String tokensSuccessfullyParsedSoFar = ( this.listener == null ) ? "<Undefined>" : this.listener.getTokensSuccessfullyParsedSoFar();
+            System.err.println( "Error: Unexpected '"+ token.getText() +"' noted after: "+ tokensSuccessfullyParsedSoFar );
+            this.offendingSymbol = token.getText();
+        // } else if ( _offendingSymbol instanceof ParserRuleContext ) {
+        //     final YAMLANTL4ParserUtils util = new YAMLANTL4ParserUtils( this.verbose );
+        //     this.offendingSymbol = util.toString( (ParserRuleContext)_offendingSymbol );
+        } else {
+            this.offendingSymbol = _offendingSymbol.toString();
+            System.err.println( HDR +"Error (internal-failure) !!!!!!!!!!!!!!: incomplete code.  Unable to handle type:"+ typeOfOffendingSymbol );
+        }
+        
+        // For sophisticated scenarios, see TIPs on how to figure out the right content for the "error-message" (to show to the user)
+        // https://stackoverflow.com/questions/21613421/how-to-implement-error-handling-in-antlr4/21615751#21615751
+
+        System.err.println( "\t" + _msg );
+        // this._stream.write( _msg );
+        // this._stream.write( System.getProperty("line.separator") );
+
     };
-
     //==============================================================================
     //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
     //==============================================================================
