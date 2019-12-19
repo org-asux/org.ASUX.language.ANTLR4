@@ -14,7 +14,7 @@ import org.antlr.v4.runtime.misc.Interval;
 
 /**
  * This class supports case-insensitive lexing by wrapping an existing
- * {@link CharStream} and forcing the lexer to see either upper or
+ * <a href="https://www.antlr.org/api/Java/org/antlr/v4/runtime/CharStreams.html">https://www.antlr.org/api/Java/org/antlr/v4/runtime/CharStreams.html</a> and forcing the lexer to see either upper or
  * lowercase characters. Grammar literals should then be either upper or
  * lower case such as 'BEGIN' or 'begin'. The text of the character
  * stream is unaffected. Example: input 'BeGiN' would match lexer rule
@@ -27,7 +27,7 @@ public class CaseChangingCharStream implements CharStream {
 	final boolean upper;
 
 	/**
-	 * Constructs a new CaseChangingCharStream wrapping the given {@link CharStream} forcing
+	 * Constructs a new CaseChangingCharStream wrapping the given <a href="https://www.antlr.org/api/Java/org/antlr/v4/runtime/CharStreams.html">https://www.antlr.org/api/Java/org/antlr/v4/runtime/CharStreams.html</a> forcing
 	 * all characters to upper case or lower case.
 	 * @param stream The stream to wrap.
 	 * @param upper If true force each symbol to upper case, otherwise force to lower.
@@ -37,16 +37,25 @@ public class CaseChangingCharStream implements CharStream {
 		this.upper = upper;
 	}
 
+	/**
+     * {@inheritDoc}
+	 */
 	@Override
 	public String getText(Interval interval) {
 		return stream.getText(interval);
 	}
 
+	/**
+     * {@inheritDoc}
+	 */
 	@Override
 	public void consume() {
 		stream.consume();
 	}
 
+	/**
+     * {@inheritDoc}
+	 */
 	@Override
 	public int LA(int i) {
 		int c = stream.LA(i);
@@ -74,6 +83,9 @@ public class CaseChangingCharStream implements CharStream {
 		return stream.index();
 	}
 
+	/**
+     * {@inheritDoc}
+	 */
 	@Override
 	public void seek(int index) {
 		stream.seek(index);
@@ -84,6 +96,9 @@ public class CaseChangingCharStream implements CharStream {
 		return stream.size();
 	}
 
+	/**
+     * {@inheritDoc}
+	 */
 	@Override
 	public String getSourceName() {
 		return stream.getSourceName();
