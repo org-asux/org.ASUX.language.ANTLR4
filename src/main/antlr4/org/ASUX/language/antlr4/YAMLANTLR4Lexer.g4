@@ -12,7 +12,7 @@ lexer grammar YAMLANTLR4Lexer ;
 	//	@header {
 	//		package org.ASUX.language;
 	//	}
-  In case of this .g4 file, this .g4 file is under src/main/java/org/asux/language
+  In case of this .g4 file, this .g4 file is under src/main/java/org/asux/language/antlr4
   So, antlr4 automatically detects/deduces the java-package name from the folder path.
 
   So.. what would happen if the above @header was UN-commented?
