@@ -31,7 +31,7 @@ echo '\
 #___ pushd ${JAVAPKG_SRCFLDR}
 #___ foreach PartialFileName (  Parser.interp ParserBaseVisitor.java Lexer.interp Parser.java ParserListener.java Lexer.java ParserBaseListener.java ParserVisitor.java )
 ### Decided that .. instead of HARD-coding the list of files (as in the 'foreach' line above) .. we'll leverage .gitignore which exists to ENSURE these above "auto-gen" files are NOT placed into SCCM.
-foreach FileName ( `cat "${JAVAPKG_SRCFLDR}/.gitignore" ` )
+foreach FileName ( ${IGNORED_FILES} )
 	set FilePATH="${JAVAPKG_SRCFLDR}/${FileName}"
 	ls -lad ${FilePATH}
 	#___ echo -n ' continue ?>>'; set ANS="$<"
