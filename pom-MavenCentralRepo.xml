@@ -3,21 +3,21 @@
 
 	<modelVersion>4.0.0</modelVersion>
 
-	<name>${project.groupId}:${project.artifactId}</name>
-	<groupId>org.asux</groupId>
-	<artifactId>aws-sdk</artifactId>
-    
+    <name>${project.groupId}:${project.artifactId}</name>
+    <groupId>org.asux</groupId>
+    <artifactId>language.antlr4</artifactId>
+
     <version>1.0</version>
-	<packaging>jar</packaging>
+    <packaging>jar</packaging>
 
     <inceptionYear>2019</inceptionYear>
-    <description>Interface to AWS SDK that produces SnakeYAML compatible org.yaml.snakeyaml.nodes.Node data-structures, for further processing by org.ASUX toolset</description>
-	<url>https://ASUX.org</url>
+    <description>ANTLR.org based lexer + parser to offer a superior implementation of 'cmd-line arguments' functionality, especially via i18n</description>
+    <url>https://ASUX.org</url>
 
 	<parent>
 		<groupId>org.asux</groupId>
 		<artifactId>MavenCentralRepo-TopLevelPOM</artifactId>
-		<version>3.1</version>
+		<version>3.1.1</version>
 		<!-- <relativePath>pom-MavenCentralRepo-TopLevelParent.xml</relativePath> -->
 		<!-- EVEN tho' PARENT-POM is in .M2 REPOSITORY... I'm forced to use RELATIVEPATH.  The reason?  The following MAVEN output -->
 <!--
@@ -59,9 +59,9 @@
 	</contributors>
 
     <scm>
-		<url>https://github.com/org-asux/org.ASUX.AWS-SDK</url>
-		<connection>scm:git:git@github.com:org-asux/org.ASUX.AWS-SDK.git</connection>
-		<developerConnection>scm:git:git@github.com:org-asux/org.ASUX.AWS-SDK.git</developerConnection>
+		<url>https://github.com/org-asux/org.ASUX.language.ANTLR4</url>
+		<connection>scm:git:git@github.com:org-asux/org.ASUX.language.ANTLR4.git</connection>
+		<developerConnection>scm:git:git@github.com:org-asux/org.ASUX.language.ANTLR4.git</developerConnection>
 		<tag>HEAD</tag>
 	</scm>
 
@@ -74,67 +74,97 @@
             <groupId>org.asux</groupId>
             <artifactId>common</artifactId>
         </dependency>
+        <!-- https://tomassetti.me/domain-specific-languages/#textual_languages -->
+        <!-- /htdocs/Manuals/GNU-OSS-FOSS/ANTLR_Mega_Tutorial.pdf -->
+        <!-- https://mvnrepository.com/artifact/org.antlr/antlr4 -->
         <dependency>
-            <groupId>org.asux</groupId>
-            <artifactId>yaml</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.asux</groupId>
-            <artifactId>yaml.nodeimpl</artifactId>
+            <groupId>org.antlr</groupId>
+            <artifactId>antlr4</artifactId>
+            <version>4.7.2</version>
+            <!-- <scope>compile</scope> -->
         </dependency>
         <!-- JUNIT5 junit5 -->
         <dependency>
             <groupId>org.junit.vintage</groupId>
             <artifactId>junit-vintage-engine</artifactId>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/commons-cli/commons-cli -->
         <dependency>
-            <groupId>commons-cli</groupId>
-            <artifactId>commons-cli</artifactId>
-        </dependency>
-        <!-- https://bitbucket.org/asomov/snakeyaml/wiki/Installation -->
-        <dependency>
-            <groupId>org.yaml</groupId>
-            <artifactId>snakeyaml</artifactId>
-        </dependency>
-        <!-- https://mvnrepository.com/artifact/com.opencsv/opencsv -->
-        <dependency>
-            <groupId>com.opencsv</groupId>
-            <artifactId>opencsv</artifactId>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+            <!-- <version>5.4.2</version> -->
+            <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>com.amazonaws</groupId>
-            <artifactId>aws-java-sdk-core</artifactId>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+            <!-- <version>5.4.2</version> -->
+            <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>com.amazonaws</groupId>
-            <artifactId>aws-java-sdk-ec2</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.amazonaws</groupId>
-            <artifactId>aws-java-sdk-s3</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>software.amazon.awssdk</groupId>
-            <artifactId>auth</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>software.amazon.awssdk</groupId>
-            <artifactId>s3</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.amazonaws</groupId>
-            <artifactId>aws-java-sdk-sts</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.amazonaws</groupId>
-            <artifactId>aws-java-sdk-route53</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.amazonaws</groupId>
-            <artifactId>aws-java-sdk-iam</artifactId>
-        </dependency>
-	</dependencies>
+    </dependencies>
+
+    <!-- @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ -->
+    <!-- =========================================================== -->
+    <!-- @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ -->
+
+    <!--
+        To SPECIFICALLY *ONLY* use this plugin, type:
+                        mvn antlr4:antlr4
+        Once you have written your grammar(s), you just run [mvn package] and the magic happens:
+            (1) ANTLR is invoked
+            (2) generates the lexer and the parser (java-class-code)
+            (3) those generated java-class-code are compiled together with the rest of your code.
+        To Repeat: This Plugin compiles the .g4 (grammer) files ahead of the java files.
+        Exception: The .g4 grammar does not need to contain the package declaration as stated in the documentation (I do not know why)
+    -->
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.antlr</groupId>
+                <artifactId>antlr4-maven-plugin</artifactId>
+                <version>4.7.2</version>
+                <configuration> <!-- a.k.a. PARAMETERS to the ANTLR plugin. -->
+                    <!-- Documentation: Run the command 'mvn antlr4:help -Ddetail=true' -->
+                    <!-- Documentation: https://www.antlr.org/api/maven-plugin/latest/antlr4-mojo.html -->
+                    <sourceDirectory>${basedir}/src/main/antlr4</sourceDirectory> <!-- (Default: ${basedir}/src/main/antlr4) The directory where the ANTLR grammar files (*.g4) are located. -->
+                    <outputDirectory>${project.build.directory}/generated-sources/antlr4</outputDirectory> <!-- (Default: ${project.build.directory}/generated-sources/antlr4)  Specify output directory where the Java files are generated. -->
+                    <!-- <outputDirectory>${basedir}/src/main/java/${antlr4.generated-sources.javapackage-as-dirpath}</outputDirectory> -->
+                    <outputDirectory>${basedir}/src/main/java</outputDirectory>
+
+                    <treatWarningsAsErrors>true</treatWarningsAsErrors> <!-- (Default: false) Treat warnings as errors. ALTERNATIVELY: User property: antlr4.treatWarningsAsErrors -->
+                    <options></options> <!-- A list of grammar options to explicitly specify to the tool. These options are passed to the tool using the -D<option>=<value> syntax. -->
+                    <!-- See ANTLR-Tool CommandLine-Options documentation @ https://github.com/antlr/antlr4/blob/master/doc/tool-options.md -->
+                    <arguments></arguments>   <!-- A list of additional command line arguments to pass to the ANTLR tool. -->
+
+                    <includes></includes>
+                    <excludes></excludes>
+                    <inputEncoding>utf-8</inputEncoding> <!-- Alternatively, User property: project.build.sourceEncoding -->
+                    <outputEncoding>utf-8</outputEncoding> <!-- specify output file encoding; defaults to source encoding.  ALTERNATIVELY:  User property: project.build.sourceEncoding -->
+                    <listener>true</listener> <!-- (Default: true): Generate parse tree listener interface and base class.   ALTERNATIVELY: User property: antlr4.listener -->
+                    <visitor>true</visitor> <!-- (Default: false) Generate parse tree visitor interface and base class. ALTERNATIVELY: User property: antlr4.visitor -->
+                </configuration>
+                <!-- Following EXECUTIONS XML-snippet is REDUNDANT.  My understanding: there is just one goal for this plugin: antlr4 -->
+                <!-- <executions>
+                    <execution>
+                        <goals>
+                            <goal>antlr4</goal>
+                        </goals>
+                        <libDirectory>src/main/antlr4_imports</libDirectory>
+                        WARNING: Before you use the above libDirectory TAG, Read more @ https://www.antlr.org/api/maven-plugin/latest/examples/libraries.html
+                    </execution>
+                </executions> -->
+            </plugin>
+        </plugins>
+    </build>
+
+    <!-- @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ -->
+    <!-- =========================================================== -->
+    <!-- @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ -->
+
+    <properties>        <!-- These are to EXTEND what is defined in Parent-POM -->
+        <antlr4.visitor>true</antlr4.visitor>
+        <antlr4.listener>true</antlr4.listener>
+        <!-- <antlr4.generated-sources.javapackage-as-dirpath>org/asux/language</antlr4.generated-sources.javapackage-as-dirpath> -->
+    </properties>
 
 </project>
 
