@@ -6,3 +6,11 @@
 .settings
 .idea
 *.iml
+src/main/java/org/ASUX/language/antlr4/YAMLANTLR4Parser.interp
+src/main/java/org/ASUX/language/antlr4/YAMLANTLR4ParserBaseVisitor.java
+src/main/java/org/ASUX/language/antlr4/YAMLANTLR4Lexer.interp
+src/main/java/org/ASUX/language/antlr4/YAMLANTLR4Parser.java
+src/main/java/org/ASUX/language/antlr4/YAMLANTLR4ParserListener.java
+src/main/java/org/ASUX/language/antlr4/YAMLANTLR4Lexer.java
+src/main/java/org/ASUX/language/antlr4/YAMLANTLR4ParserBaseListener.java
+src/main/java/org/ASUX/language/antlr4/YAMLANTLR4ParserVisitor.java
