@@ -78,12 +78,14 @@ YAML_COMMAND :	YAML_READ | YAML_LIST | YAML_DELETE | YAML_REPLACE | YAML_INSERT 
 
 // ==================================
 
-INPUT_FROM: '-i' | '--input' | '<' ;
-OUTPUT_TO: '-o' | '--output' | '>' ;
+VERBOSE     : '--verbose' | '-v' ;
+SHOWSTATS   : '--showStats' | '--showstats' ;
 
-DELIMITER_OPT : '--delimiter' | '-d' ;
+PROJECT     : '--project' | '-p';
+
+DELIMITER_OPT   : '--delimiter' | '-d' ;
 YAMLLIBRARY_OPT : '--yamllibrary' | '-yaml' ;
-YAMLLIBRARY_LIST : 'SnakeYAML' | 'snakeyaml' | 'esotericsoftware' | 'NodeImpl' | 'nodeimpl' | 'CollectionsImpl' ;
+YAMLLIBRARY_LIST: 'SnakeYAML' | 'snakeyaml' | 'esotericsoftware' | 'NodeImpl' | 'nodeimpl' | 'CollectionsImpl' ;
 // to-do: i18n enhancements needed to the above.
 
 QUOTEYAMLCONTENT : '--single-quote'	{ setText("'"); } // see http://sds.sourceforge.net/src/antlr/doc/lexer.html#_bb14
@@ -97,8 +99,8 @@ QUOTEYAMLCONTENT : '--single-quote'	{ setText("'"); } // see http://sds.sourcefo
 	| '--NO-QUOTE'  	{ setText(""); }	// http://sds.sourceforge.net/src/antlr/doc/lexer.html#_bb14
 	;
 
-VERBOSE   : '--verbose' | '-v' ;
-SHOWSTATS : '--showStats' | '--showstats' ;
+INPUT_FROM: '-i' | '--input' | '<' ;
+OUTPUT_TO: '-o' | '--output' | '>' ;
 
 // ==================================
 
