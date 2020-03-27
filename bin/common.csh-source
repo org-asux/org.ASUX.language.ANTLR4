@@ -3,7 +3,8 @@
 set JARFOLDER="/Users/development/dist"
 set ANTLRVERSION="4.7.2"
 set JAVAPKGNAME="org.ASUX.language"
-set JAVAPKG_ASPATH="org/ASUX/language" ### Java packagename in the form of a FILE/FOLDER Path.
+set JAVAPKG_ASPATH="org/ASUX/language/antlr4" ### Java packagename in the form of a FILE/FOLDER Path.
+set MAVEN_FLDRPATH="org/ASUX/language.antlr4" ### Java packagename in the form of a FILE/FOLDER Path.
 set JAVAPKG_SRCFLDR="./src/main/java/${JAVAPKG_ASPATH}"
 set GRAMMERNAMEPREFIX="YAMLANTLR4"
 
@@ -13,8 +14,23 @@ set ANTLR4_COMPLETEJAR="${JARFOLDER}/antlr-${ANTLRVERSION}-complete.jar"
 set BUILDROOT="/var/build/org.asux-language-1.0"
 set COMPILEDJAVAFILE="YAMLANTLR4Parser.class"
 set MVNREPOHOME="~/.m2/repository"
-set PROJMVNINSTALLFOLDER="${MVNREPOHOME}/${JAVAPKG_ASPATH}"
+set PROJMVNINSTALLFOLDER="${MVNREPOHOME}/${MAVEN_FLDRPATH}"
 unset VERBOSE
+
+###============================================
+###@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+###============================================
+
+set IGNORED_FILES=( \
+        YAMLANTLR4Parser.interp                 \
+        YAMLANTLR4ParserBaseVisitor.java        \
+        YAMLANTLR4Lexer.interp                  \
+        YAMLANTLR4Parser.java                   \
+        YAMLANTLR4ParserListener.java           \
+        YAMLANTLR4Lexer.java                    \
+        YAMLANTLR4ParserBaseListener.java       \
+        YAMLANTLR4ParserVisitor.java            \
+)
 
 ###============================================
 ###@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
