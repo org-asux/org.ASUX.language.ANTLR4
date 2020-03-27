@@ -63,7 +63,7 @@ yaml_commands : yaml_command+ EOF ;
 
 yaml_command: ( yaml_command_read | yaml_command_list | yaml_command_delete | yaml_command_replace | yaml_command_insert | yaml_command_macro | yaml_command_table ) SEMICOLON NEWLINE* ;
 
-yaml_command_read:	YAML YAML_READ	  regularexpression	optionals INPUT_FROM inputSrc=FILEPATH OUTPUT_TO outputSink=FILEPATH ;
+yaml_command_read:	YAML YAML_READ	  regularexpression	(PROJECT projectionpath)? optionals INPUT_FROM inputSrc=FILEPATH OUTPUT_TO outputSink=FILEPATH ;
 yaml_command_list:	YAML YAML_LIST 	  regularexpression	optionals INPUT_FROM inputSrc=FILEPATH OUTPUT_TO outputSink=FILEPATH ;
 yaml_command_delete:	YAML YAML_DELETE  regularexpression	optionals INPUT_FROM inputSrc=FILEPATH OUTPUT_TO outputSink=FILEPATH ;
 yaml_command_replace:	YAML YAML_REPLACE regularexpression newcontent	optionals INPUT_FROM inputSrc=FILEPATH OUTPUT_TO outputSink=FILEPATH ;
@@ -91,10 +91,15 @@ inlinejsonelem :	( SIMPLEWORD | any_quoted_text )	COLON	( SIMPLEWORD | any_quote
 any_quoted_text : SINGLEQUOTEDTEXT | DOUBLEQUOTEDTEXT | SINGLEDOUBLEQUOTEDTEXT | DOUBLESINGLEQUOTEDTEXT ;
 // any_quoted_text : SINGLEQUOTEDTEXT | DOUBLEQUOTEDTEXT ;
 
+//=================================================================================
+//@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+//=================================================================================
 
-// WARNING: Do NOT move 'REGULAREXPRESSION' to 'PARSER' section
+// WARNING: Do NOT move 'regularexpression' or 'projectionpath' to 'PARSER' section
 // NOTE: an XML-path or a YAML-Path can look like a file-path with a leading '/'
+
 regularexpression: FILEPATH | any_quoted_text | NONQUOTEDTEXT;
 
+projectionpath: any_quoted_text | ANYWORD;
 
 //EOF
