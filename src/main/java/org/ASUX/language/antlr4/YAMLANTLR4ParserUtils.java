@@ -30,10 +30,9 @@
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.ASUX.language;
+package org.ASUX.language.antlr4;
 
 import java.util.ArrayList;
-import java.util.regex.*;
 
 import org.antlr.v4.runtime.*;      // https://www.antlr.org/api/Java/org/antlr/v4/runtime/package-summary.html
                                     // https://www.antlr.org/api/Java/org/antlr/v4/runtime/CommonTokenStream.html
@@ -41,9 +40,7 @@ import org.antlr.v4.runtime.*;      // https://www.antlr.org/api/Java/org/antlr/
                                     // https://www.antlr.org/api/Java/org/antlr/v4/runtime/ParserRuleContext.html
                                     // https://www.antlr.org/api/Java/org/antlr/v4/runtime/tree/ParseTree.html
 import org.antlr.v4.runtime.tree.*; // https://www.antlr.org/api/Java/org/antlr/v4/runtime/tree/TerminalNode.html
-import org.antlr.v4.runtime.misc.*; // https://www.antlr.org/api/Java/org/antlr/v4/runtime/UnbufferedCharStream.html
 
-import static org.junit.Assert.*;
 
 public class YAMLANTLR4ParserUtils {
 

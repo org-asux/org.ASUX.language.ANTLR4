@@ -1,4 +1,4 @@
-package org.ASUX.language;
+package org.ASUX.language.antlr4;
 
 // Copied from: https://github.com/antlr/antlr4/blob/master/doc/resources/CaseChangingCharStream.java
 // Was: package org.antlr.v4.runtime;

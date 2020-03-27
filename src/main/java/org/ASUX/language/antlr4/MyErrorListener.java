@@ -30,21 +30,10 @@
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.ASUX.language;
-
-import java.util.regex.*;
-
-import java.io.PrintStream;
-import java.io.StringWriter;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.List;
+package org.ASUX.language.antlr4;
 
 import org.antlr.v4.runtime.*;      // https://www.antlr.org/api/Java/org/antlr/v4/runtime/package-summary.html
-import org.antlr.v4.runtime.tree.*; 
-import org.antlr.v4.runtime.misc.*; // https://www.antlr.org/api/Java/org/antlr/v4/runtime/UnbufferedCharStream.html
 
-import static org.junit.Assert.*;
 
 //==============================================================================
 //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
