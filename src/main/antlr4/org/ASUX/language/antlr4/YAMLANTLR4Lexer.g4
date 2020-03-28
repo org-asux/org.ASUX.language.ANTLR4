@@ -129,6 +129,7 @@ COLON	  : ':' ;
 SEMICOLON : ';' ;
 JSONBEGIN : '{' ;
 JSONEND   : '}' ;
+TAB       : '\t';
 
 // ==================================
 
@@ -144,6 +145,8 @@ DOUBLESINGLEQUOTEDTEXT : DOUBLEQUOTE NONQUOTEDTEXT ( SINGLEQUOTEDTEXT | SINGLEDO
 // !!!! WARNING. 'FILEPATH' does NOT allow a SIMPLE-file-name (which will be considered 'ANYWORD' or 'SINGLEQUOTEDTEXT')
 
 FILEPATH : '/'? FILEPATHCHAR+ ( '/' FILEPATHCHAR+ )+ ;
+
+DELIMITER_CHAR : COMMA | COLON | SEMICOLON | [_.@%/~] ;
 
 // ==================================
 
