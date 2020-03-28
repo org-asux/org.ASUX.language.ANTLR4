@@ -63,14 +63,14 @@ yaml_commands : yaml_command+ EOF ;
 
 yaml_command: ( yaml_command_read | yaml_command_list | yaml_command_delete | yaml_command_replace | yaml_command_insert | yaml_command_macro | yaml_command_table ) SEMICOLON NEWLINE* ;
 
-yaml_command_read:	YAML YAML_READ	  regularexpression	(PROJECT projectionpath)? optionals INPUT_FROM inputSrc=FILEPATH OUTPUT_TO outputSink=FILEPATH ;
-yaml_command_list:	YAML YAML_LIST 	  regularexpression	optionals INPUT_FROM inputSrc=FILEPATH OUTPUT_TO outputSink=FILEPATH ;
-yaml_command_delete:	YAML YAML_DELETE  regularexpression	optionals INPUT_FROM inputSrc=FILEPATH OUTPUT_TO outputSink=FILEPATH ;
-yaml_command_replace:	YAML YAML_REPLACE regularexpression newcontent	optionals INPUT_FROM inputSrc=FILEPATH OUTPUT_TO outputSink=FILEPATH ;
-yaml_command_insert:	YAML YAML_INSERT  regularexpression newcontent	optionals INPUT_FROM inputSrc=FILEPATH OUTPUT_TO outputSink=FILEPATH ;
-yaml_command_table:	YAML YAML_TABLE	  regularexpression columns	optionals INPUT_FROM inputSrc=FILEPATH OUTPUT_TO outputSink=FILEPATH ;
-yaml_command_macro:	YAML YAML_MACRO   FILEPATH		optionals INPUT_FROM inputSrc=FILEPATH OUTPUT_TO outputSink=FILEPATH ;
-yaml_command_batch:	YAML YAML_BATCH	  FILEPATH		optionals INPUT_FROM inputSrc=FILEPATH OUTPUT_TO outputSink=FILEPATH ;
+yaml_command_read:	    optionals   YAML optionals YAML_READ	optionals   regularexpression	(PROJECT projectionpath)? optionals INPUT_FROM inputSrc=FILEPATH OUTPUT_TO outputSink=FILEPATH  optionals;
+yaml_command_list:	    optionals   YAML optionals YAML_LIST 	optionals   regularexpression               optionals INPUT_FROM inputSrc=FILEPATH OUTPUT_TO outputSink=FILEPATH   optionals;
+yaml_command_delete:	optionals   YAML optionals YAML_DELETE  optionals   regularexpression               optionals INPUT_FROM inputSrc=FILEPATH OUTPUT_TO outputSink=FILEPATH   optionals;
+yaml_command_replace:	optionals   YAML optionals YAML_REPLACE optionals   regularexpression newcontent	optionals INPUT_FROM inputSrc=FILEPATH OUTPUT_TO outputSink=FILEPATH   optionals;
+yaml_command_insert:	optionals   YAML optionals YAML_INSERT  optionals   regularexpression newcontent	optionals INPUT_FROM inputSrc=FILEPATH OUTPUT_TO outputSink=FILEPATH   optionals;
+yaml_command_table: 	optionals   YAML optionals YAML_TABLE   optionals   regularexpression columns	    optionals INPUT_FROM inputSrc=FILEPATH OUTPUT_TO outputSink=FILEPATH   optionals;
+yaml_command_macro:	    optionals   YAML optionals YAML_MACRO   optionals   macroProperties=FILEPATH		optionals INPUT_FROM inputSrc=FILEPATH OUTPUT_TO outputSink=FILEPATH   optionals;
+yaml_command_batch:	    optionals   YAML optionals YAML_BATCH	optionals   batchFilePath=FILEPATH		    optionals INPUT_FROM inputSrc=FILEPATH OUTPUT_TO outputSink=FILEPATH   optionals;
 
 // ==================================
 
