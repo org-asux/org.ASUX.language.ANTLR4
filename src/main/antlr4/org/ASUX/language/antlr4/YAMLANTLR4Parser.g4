@@ -74,7 +74,7 @@ yaml_command_batch:	    optionals   YAML optionals YAML_BATCH	optionals   batchF
 
 // ==================================
 
-optionals  : ( ( DELIMITER_OPT  delimiter+=any_quoted_text ) | ( YAMLLIBRARY_OPT  yamlImplementation+=YAMLLIBRARY_LIST ) | VERBOSE | SHOWSTATS | yamlQuoteChar=QUOTEYAMLCONTENT )* ;
+optionals  : ( ( DELIMITER_OPT  delimiter+=delimiter_text ) | ( YAMLLIBRARY_OPT  yamlImplementation+=YAMLLIBRARY_LIST ) | VERBOSE | SHOWSTATS | yamlQuoteChar=QUOTEYAMLCONTENT )* ;
 
 newcontent : (  FILEPATH | inlinejson  ) ;
 
@@ -87,9 +87,8 @@ inlinejsonelem :	( SIMPLEWORD | any_quoted_text )	COLON	( SIMPLEWORD | any_quote
 
 // ==================================
 
-
+delimiter_text : DELIMITER_CHAR | any_quoted_text ;
 any_quoted_text : SINGLEQUOTEDTEXT | DOUBLEQUOTEDTEXT | SINGLEDOUBLEQUOTEDTEXT | DOUBLESINGLEQUOTEDTEXT ;
-// any_quoted_text : SINGLEQUOTEDTEXT | DOUBLEQUOTEDTEXT ;
 
 //=================================================================================
 //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
