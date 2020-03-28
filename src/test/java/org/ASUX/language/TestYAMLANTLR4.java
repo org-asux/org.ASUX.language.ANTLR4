@@ -38,6 +38,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assume.assumeFalse;
 import static org.junit.Assume.assumeTrue;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import org.junit.jupiter.api.*;
 // import static org.junit.Assert.*; // OLD JUnit compatible.
@@ -78,7 +79,6 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 public class TestYAMLANTLR4 {
 
     private static final String HDR0 = TestYAMLANTLR4.class.getName();
-    public static final String CLASSNAME = HDR0;
     private static final String TEST_INPUT_YAML_COMMANDS = "src/test/resources/user-input-YAML_commands.txt";
     private static final String TEST_INPUT_DEFECTIVE_YAML_COMMANDS = "src/test/resources/user-defective-YAML_commands.txt";
 
@@ -212,7 +212,7 @@ public class TestYAMLANTLR4 {
                 if ( readCtx != null ) {
                     if ( this.verbose ) System.out.println( HDR + " yaml READ command detected!" );
                     if ( this.verbose ) System.out.println( HDR + "about to run LEXER's ASSERT-checks" );
-                    assertTrue(YAMLANTLR4Lexer.YAML ==    commonTokenStream.get(ii++).getType(), () -> "!!!!!!!!!!!!! TOTAL Failure of Test. !!!!!!!!!!!");
+                    assertEquals(YAMLANTLR4Lexer.YAML,              commonTokenStream.get(ii++).getType());
                     assertEquals(YAMLANTLR4Lexer.YAML_READ,         commonTokenStream.get(ii++).getType());
                     final int regExpPos = ii;
                     // assertTrue( YAMLANTLR4Lexer.REG ULAR EXP RESSION == commonTokenStream.get( ii++ ).getType() ); // no longer have such a token.  Instead it's a parser element.
@@ -244,20 +244,32 @@ public class TestYAMLANTLR4 {
                     assertTrue( s.equals( regExpStr ) );
                     assertEquals("'/reg/\"exp\"/g'", s);
 
-                    final YAMLANTLR4Parser.OptionalsContext optionalsCtx = readCtx.optionals();
-                    final ArrayList<String> sss22 = util.toStrings( optionalsCtx );
-                    assertTrue( sss22.size() == 5 );
-                    // if ( this.verbose ) System.out.println( HDR + "Read-YAML's OPTIONALs =["+ sss22 +"]" );
-                    if ( this.verbose ) System.out.println( HDR + "\tRead-YAML's OPTIONALs:- " );
-                    sss22.forEach(System.out::println);
-                    
-                    final java.util.List<YAMLANTLR4Parser.Any_quoted_textContext> delims = optionalsCtx.delimiter;
-                    if ( this.verbose ) System.out.print( HDR + "\tRead-YAML's Delimiters:- " );
-                    // does NOT WORK: delims.forEach( d -> System.out.println(d.getText()) );
-                    delims.forEach( delim -> { final ArrayList<String> sss33 = util.toStrings( delim ); sss33.forEach( System.err::println); } );
-                    final String ed = util.getEffectiveOption( optionalsCtx.delimiter );
-                    if ( this.verbose ) System.out.println( HDR + "Read-YAML's Effective-Delimiter = ["+ ed +"]" );
-                    assertTrue( "\"/\"".equals(ed) );
+                    final java.util.List<YAMLANTLR4Parser.OptionalsContext> optionalsCtxSet = readCtx.optionals();
+                    final ArrayList<String> sss22 = util.toStrings( optionalsCtxSet );
+                    Assertions.assertEquals(5, sss22.size());
+                    if (this.verbose) {
+                        System.out.println(HDR + "\tRead-YAML's OPTIONALs:- ");
+                        sss22.forEach(System.out::println);
+                    }
+
+                    String delimiterFound = "Undefined";
+                    for( YAMLANTLR4Parser.OptionalsContext optionalsCtx : optionalsCtxSet ) {
+
+                        // Here in READYAML, only one delimiter-option is provided.
+                        // But, below in LIST-YAML, multiple instance of the '--delimiter' option entered by User.
+                        final java.util.List<YAMLANTLR4Parser.Any_quoted_textContext> delims = optionalsCtx.delimiter;
+                        if ( this.verbose ) System.out.print( HDR + "\tRead-YAML's Delimiters:- " );
+                        // does NOT WORK: delims.forEach( d -> System.out.println(d.getText()) );
+                        delims.forEach( delim -> { final ArrayList<String> sss33 = util.toStrings( delim ); sss33.forEach( System.err::println); } );
+                        try {
+                            delimiterFound = util.getEffectiveOption(optionalsCtx.delimiter);
+                            if ( this.verbose ) System.out.println( HDR + "Read-YAML's Effective-Delimiter = ["+ delimiterFound +"]" );
+                        } catch( java.util.NoSuchElementException e ) {
+                            if ( this.verbose ) System.out.println( HDR + "Read-YAML's Effective-Delimiter Not in this.  Perhaps another one in this optionalsCtxSet(SET)." );
+                            // continue; // maybe delimiter is defined another 'optionalsCtx' instance within this 'optionalsCtxSet'(SET)
+                        }
+                    }
+                    assertTrue( "\"/\"".equals(delimiterFound) );
 
                     //=================================================================
 // // REF: https://github.com/antlr/antlr4/blob/master/doc/tree-matching.md
@@ -299,38 +311,92 @@ public class TestYAMLANTLR4 {
 //                     // final java.util.List<ParseTreeMatch> matches99 = ptPatt99.findAll( topmostCtx, "//yaml_command/*/optionals" ); // <<-- !!!! RETURN is a List<>
 //                     // if ( this.verbose ) matches99.forEach( ptree -> System.out.println( HDR + "#1(matcher) //yaml_command/*/optionals >> "+ ptree ) );
 
-                    final java.util.Collection<ParseTree> xpathQRes = org.antlr.v4.runtime.tree.xpath.XPath.findAll( topmostCtx, "//yaml_command/*/optionals", parser ); 
+                    //=================================================================
+                    final java.util.Collection<ParseTree> xpathQRes = org.antlr.v4.runtime.tree.xpath.XPath.findAll( topmostCtx, "//yaml_command/*/optionals", parser );
                     if ( this.verbose ) xpathQRes.forEach( ptree -> System.out.println( HDR + "#2(XPath.findAll) //yaml_command/*/optionals >> "+ ptree.getText() ) );
                     // XPATH-EXAMPLE = //'return'   :means: any 'return' literal in tree
                     // XPATH-EXAMPLE = /prog/func/!'myvalue'     :means: any literal other than 'myvalue'.. under func, which is under prog.
                     java.util.Iterator<ParseTree> iterator = xpathQRes.iterator();
-                    iterator.hasNext();
-                    assertTrue( "--verbose--delimiter\"/\"--showStats-v".equals( iterator.next().getText() ) );
-                    iterator.hasNext();
-                    assertTrue( "--delimiter\"JUNKSTR\"-d\"/\"--yamllibrarySnakeYAML'".equals( iterator.next().getText() ) );
+                    String usersInput;
+                    while ( iterator.hasNext() ) { // see output of this While Loop at the end of this block!!!!!!!!!!!!!!!!!!!!!!!!!
+                        usersInput = iterator.next().getText();
+                        if (this.verbose)  System.out.println(HDR + "org.antlr.v4.runtime.tree.xpath.XPath.findAll(verbose/delimiter/showStats): usersInput identified as = [" + usersInput + "]");
+                        if ( usersInput != null && usersInput.trim().length() != 0 ) {
+                            assertTrue( "--verbose--delimiter\"/\"--showStats-v".equals( usersInput ) ||
+                                    "--delimiter\"JUNKSTR\"-d\"/\"--yamllibrarySnakeYAML'".equals( usersInput ) ); // <<----------- !!!!!!!!!!!!!!!!  The test !!!!!!!!!!!!
+                        }
+                    } // while
+// org.ASUX.language.TestYAMLANTLR4.testYAMLCommands():	org.antlr.v4.runtime.tree.xpath.XPath.findAll(verbose/delimiter/showStats): usersInput identified as = []
+// org.ASUX.language.TestYAMLANTLR4.testYAMLCommands():	org.antlr.v4.runtime.tree.xpath.XPath.findAll(verbose/delimiter/showStats): usersInput identified as = []
+// org.ASUX.language.TestYAMLANTLR4.testYAMLCommands():	org.antlr.v4.runtime.tree.xpath.XPath.findAll(verbose/delimiter/showStats): usersInput identified as = []
+// org.ASUX.language.TestYAMLANTLR4.testYAMLCommands():	org.antlr.v4.runtime.tree.xpath.XPath.findAll(verbose/delimiter/showStats): usersInput identified as = [--verbose--delimiter"/"--showStats-v]
+// org.ASUX.language.TestYAMLANTLR4.testYAMLCommands():	org.antlr.v4.runtime.tree.xpath.XPath.findAll(verbose/delimiter/showStats): usersInput identified as = []
+// org.ASUX.language.TestYAMLANTLR4.testYAMLCommands():	org.antlr.v4.runtime.tree.xpath.XPath.findAll(verbose/delimiter/showStats): usersInput identified as = []
+// org.ASUX.language.TestYAMLANTLR4.testYAMLCommands():	org.antlr.v4.runtime.tree.xpath.XPath.findAll(verbose/delimiter/showStats): usersInput identified as = []
+// org.ASUX.language.TestYAMLANTLR4.testYAMLCommands():	org.antlr.v4.runtime.tree.xpath.XPath.findAll(verbose/delimiter/showStats): usersInput identified as = []
+// org.ASUX.language.TestYAMLANTLR4.testYAMLCommands():	org.antlr.v4.runtime.tree.xpath.XPath.findAll(verbose/delimiter/showStats): usersInput identified as = [--delimiter"JUNKSTR"-d"/"--yamllibrarySnakeYAML']
+// org.ASUX.language.TestYAMLANTLR4.testYAMLCommands():	org.antlr.v4.runtime.tree.xpath.XPath.findAll(verbose/delimiter/showStats): usersInput identified as = []
+// org.ASUX.language.TestYAMLANTLR4.testYAMLCommands():	Accurately verified code-exception-logic - that Read-CMd has NO YAML-Implementation cmdline options
+
+
+                    // iterator.hasNext();
+                    // usersInput = iterator.next().getText();
+                    // if (this.verbose)  System.out.println(HDR + "org.antlr.v4.runtime.tree.xpath.XPath.findAll(verbose/delimiter/showStats): usersInput identified as = [" + usersInput + "]");
+                    // iterator.hasNext();
+                    // usersInput = iterator.next().getText();
+                    // if (this.verbose)  System.out.println(HDR + "org.antlr.v4.runtime.tree.xpath.XPath.findAll(verbose/delimiter/showStats): usersInput identified as = [" + usersInput + "]");
+                    // iterator.hasNext();
+                    // usersInput = iterator.next().getText();
+                    // if (this.verbose)  System.out.println(HDR + "org.antlr.v4.runtime.tree.xpath.XPath.findAll(verbose/delimiter/showStats): usersInput identified as = [" + usersInput + "]");
+                    // assertTrue( "--verbose--delimiter\"/\"--showStats-v".equals( usersInput ) ); // <<----------- !!!!!!!!!!!!!!!!  The test !!!!!!!!!!!!
+                    // iterator.hasNext();
+                    // usersInput = iterator.next().getText();
+                    // if (this.verbose)  System.out.println(HDR + "org.antlr.v4.runtime.tree.xpath.XPath.findAll(verbose/delimiter/showStats): usersInput identified as = [" + usersInput + "]");
+                    //
+                    // iterator.hasNext();
+                    // usersInput = iterator.next().getText();
+                    // if (this.verbose)  System.out.println(HDR + "org.antlr.v4.runtime.tree.xpath.XPath.findAll(delimiter/JUNKSTR/yamllibrarySnakeYAML): usersInput identified as = [" + usersInput + "]");
+                    // iterator.hasNext();
+                    // usersInput = iterator.next().getText();
+                    // if (this.verbose)  System.out.println(HDR + "org.antlr.v4.runtime.tree.xpath.XPath.findAll(delimiter/JUNKSTR/yamllibrarySnakeYAML): usersInput identified as = [" + usersInput + "]");
+                    // iterator.hasNext();
+                    // usersInput = iterator.next().getText();
+                    // if (this.verbose)  System.out.println(HDR + "org.antlr.v4.runtime.tree.xpath.XPath.findAll(delimiter/JUNKSTR/yamllibrarySnakeYAML): usersInput identified as = [" + usersInput + "]");
+                    //
+                    // assertTrue( "--delimiter\"JUNKSTR\"-d\"/\"--yamllibrarySnakeYAML'".equals( usersInput ) ); // <<----------- !!!!!!!!!!!!!!!!  The test !!!!!!!!!!!!
 
                     //=================================================================
                     try {
-                        final java.util.List<Token> yamlImps = optionalsCtx.yamlImplementation;
-                        // final java.util.List<TerminalNode> yamlImps = optionalsCtx.YAMLLIBRARY_OPT();
-                        if ( ! yamlImps.isEmpty() && this.verbose ) System.out.print( HDR + "Read-YAML's yamlImplementation:- " );
-                        yamlImps.forEach( tk -> System.out.println(tk.getText()) );
-                        // see how to call getText() correctly @ https://github.com/antlr/antlr4/blob/master/doc/faq/parse-trees.md#how-do-i-get-the-input-text-for-a-parse-tree-subtree
-                        if ( this.verbose ) System.out.println( HDR + "Read-YAML's Effective-YAML-Implementation = ["+ util.getEffectiveTokenOption( optionalsCtx.yamlImplementation ) +"]" );
+                        for( YAMLANTLR4Parser.OptionalsContext optionalsCtx : optionalsCtxSet ) {
+                            final java.util.List<Token> yamlImps = optionalsCtx.yamlImplementation;
+                            // final java.util.List<TerminalNode> yamlImps = optionalsCtx.YAMLLIBRARY_OPT();
+                            if (!yamlImps.isEmpty() && this.verbose)
+                                System.out.print(HDR + "Read-YAML's yamlImplementation:- ");
+                            yamlImps.forEach(tk -> System.out.println(tk.getText()));
+                            // see how to call getText() correctly @ https://github.com/antlr/antlr4/blob/master/doc/faq/parse-trees.md#how-do-i-get-the-input-text-for-a-parse-tree-subtree
+                            if (this.verbose)
+                                System.out.println(HDR + "Read-YAML's Effective-YAML-Implementation = [" + util.getEffectiveTokenOption(optionalsCtx.yamlImplementation) + "]");
+                        } // for loop
                     } catch ( java.util.NoSuchElementException e ) {
                         if ( e.getMessage().equals("The method's sole-argument passed.. is an empty java.util.List object") )
                             System.out.println( HDR + "Accurately verified code-exception-logic - that Read-CMd has NO YAML-Implementation cmdline options" );
                         else
-                            assertTrue( false );
+                            fail(); // Test failed.
                     }
 
-                    final java.util.List<TerminalNode> showStatsOpt = optionalsCtx.SHOWSTATS();
-                    if ( this.verbose ) System.out.println( HDR + "Read-YAML's show-Statistics = ["+ ( showStatsOpt.size() > 0 ) +"]" );
-                    assertTrue( showStatsOpt.size() > 0 );
+                    boolean bShowStatsCmdLineOptionFound = false;
+                    int verboseCmdLineOptionCount = 0;
+                    for( YAMLANTLR4Parser.OptionalsContext optionalsCtx : optionalsCtxSet ) {
+                        final java.util.List<TerminalNode> showStatsOpt = optionalsCtx.SHOWSTATS();
+                        bShowStatsCmdLineOptionFound = bShowStatsCmdLineOptionFound || (showStatsOpt.size() > 0);
+                        if (this.verbose) System.out.println(HDR + "Read-YAML's show-Statistics = [" + bShowStatsCmdLineOptionFound + "]");
 
-                    final java.util.List<TerminalNode> verboseOpt = optionalsCtx.VERBOSE();
-                    if ( this.verbose ) System.out.println( HDR + "Read-YAML's verbose-Count = ["+ verboseOpt.size() +"]" );
-                    assertEquals(2, verboseOpt.size());
+                        final java.util.List<TerminalNode> verboseOpt = optionalsCtx.VERBOSE();
+                        verboseCmdLineOptionCount +=  verboseOpt.size();
+                        if (this.verbose) System.out.println(HDR + "Read-YAML's verbose-Count = [" + verboseCmdLineOptionCount + "]");
+                    }
+                    assertEquals(2, verboseCmdLineOptionCount );
+                    assertTrue( bShowStatsCmdLineOptionFound );
 
                     // see how to call getText() correctly @ https://github.com/antlr/antlr4/blob/master/doc/faq/parse-trees.md#how-do-i-get-the-input-text-for-a-parse-tree-subtree
                     final String inputSrc   = readCtx.inputSrc.getText();   // commonTokenStream.get( regExpPos + ?? ).getText();
@@ -374,49 +440,91 @@ public class TestYAMLANTLR4 {
                     assertTrue( s.equals( regExpStr ) );
                     assertTrue( s.equals( "'/2reg/expresssion'" ) );
 
-                    final YAMLANTLR4Parser.OptionalsContext optionalsCtx = listCtx.optionals();
-                    final ArrayList<String> sss22 = util.toStrings( optionalsCtx );
+                    final java.util.List<YAMLANTLR4Parser.OptionalsContext> optionalsCtxSet = listCtx.optionals();
+                    final ArrayList<String> sss22 = util.toStrings( optionalsCtxSet );
                     assertEquals(7, sss22.size());
-                    if ( this.verbose ) System.out.println( HDR + "\tLIST-YAML's OPTIONALs:- " );
-                    sss22.forEach(System.out::println);
+                    if ( this.verbose ) {
+                        System.out.println( HDR + "\tLIST-YAML's OPTIONALs:- " );
+                        sss22.forEach(System.out::println);
+                    }
 
-                    // --delimiter 'JunkString' -d ","
-                    // Unlike YamlQUoteChar (below), the PARSER-grammer __Collects__ every instance of the '--delimiter' option entered by User.
-                    // No reason to have such a COMPLEX grammer.  This code is to demonstrate.  Do not make things this complex.
-                    final java.util.List<YAMLANTLR4Parser.Any_quoted_textContext> delims = optionalsCtx.delimiter;
-                    assertEquals(2, delims.size());
-                    if ( this.verbose ) System.out.print( HDR + "\tLIST-YAML's Delimiters:- " );
-                    // does NOT WORK: delims.forEach( d -> System.out.println(d.getText()) );
-                    delims.forEach( delim -> { final ArrayList<String> sss33 = util.toStrings( delim ); sss33.forEach( System.err::println); } );
-                    // if ( this.verbose ) System.out.println( HDR + "LIST-YAML's the EFFECTIVE-delim =["+ util.toStrings( delims.get( delims.size()-1 ) ).get(0) +"]" );
-                    final String ed = util.getEffectiveOption( optionalsCtx.delimiter );
-                    if ( this.verbose ) System.out.println( HDR + "LIST-YAML's Effective-Delimiter = ["+ ed +"]" );
-                    assertTrue( "\"/\"".equals(ed) );
+                    String effectiveDelimiter = null;
+                    int numOfDelimitersFound = 0;
+                    String yamlImplFound = null;
+                    int numOfYamlLibrariesFound = 0;
+                    String yamlQuoteChar = null;
 
-                    // --yamllibrary SnakeYAML --yamllibrary NodeImpl
-                    // Unlike YamlQUoteChar (below), the PARSER-grammer __Collects__ every instance of the '--delimiter' option entered by User.
-                    // No reason to have such a COMPLEX grammer.  This code is to demonstrate.  Do not make things this complex.
-                    final java.util.List<Token> yamlImps = optionalsCtx.yamlImplementation;
-                    assertEquals(1, yamlImps.size());
-                    // final java.util.List<TerminalNode> yamlImps = optionalsCtx.YAMLLIBRARY_OPT();
-                    if ( ! yamlImps.isEmpty() && this.verbose ) System.out.print( HDR + "LIST-YAML's yamlImplementation:- " );
-                    yamlImps.forEach( tk -> System.out.println( tk.getText() ) );
-                    // see how to call getText() correctly @ https://github.com/antlr/antlr4/blob/master/doc/faq/parse-trees.md#how-do-i-get-the-input-text-for-a-parse-tree-subtree
-                    final String eyi = util.getEffectiveTokenOption( optionalsCtx.yamlImplementation );
-                    if ( this.verbose ) System.out.println( HDR + "LIST-YAML's Effective-YAML-Implementation = ["+ eyi +"]" );
+                    for( YAMLANTLR4Parser.OptionalsContext optionalsCtx : optionalsCtxSet ) {
 
-                    final Token yamlQuoteChar = optionalsCtx.yamlQuoteChar;
-                    if ( this.verbose ) System.out.println( HDR + "LIST-YAML's Effective-QuotingChar = ["+ yamlQuoteChar.getText() +"]" );
-                    assertTrue( "'".equals( yamlQuoteChar.getText() ) );
-                    // see how to call getText() correctly @ https://github.com/antlr/antlr4/blob/master/doc/faq/parse-trees.md#how-do-i-get-the-input-text-for-a-parse-tree-subtree
+                        // --delimiter 'JunkString' -d ","
+                        // Unlike YamlQUoteChar (below), the PARSER-grammer __Collects__ every instance of the '--delimiter' option entered by User.
+                        // Flexibility for use means a COMPLEX grammer.
+                        final java.util.List<YAMLANTLR4Parser.Any_quoted_textContext> delims = optionalsCtx.delimiter;
 
-                    final java.util.List<TerminalNode> showStatsOpt = optionalsCtx.SHOWSTATS();
-                    if ( this.verbose ) System.out.println( HDR + "LIST-YAML's show-Statistics = ["+ ( showStatsOpt.size() > 0 ) +"]" );
-                    assertEquals(0, showStatsOpt.size());
+                        if (this.verbose) {
+                            System.out.print(HDR + "\tLIST-YAML's Delimiters:- ");
+                            // does NOT WORK: delims.forEach( d -> System.out.println(d.getText()) );
+                            delims.forEach(delim -> {
+                                final ArrayList<String> sss33 = util.toStrings(delim);
+                                sss33.forEach(System.err::println);
+                            });
+                        }
 
-                    final java.util.List<TerminalNode> verboseOpt = optionalsCtx.VERBOSE();
-                    if ( this.verbose ) System.out.println( HDR + "List-YAML's verbose-Count = ["+ verboseOpt.size() +"]" );
-                    assertEquals(0, verboseOpt.size());
+                        if ( delims.size() > 0 ) {
+                            final String ed = util.getEffectiveOption( delims );
+                            if (this.verbose) System.out.println(HDR + "LIST-YAML's Delimiter in this instance = [" + ed + "]");
+                            numOfDelimitersFound += delims.size();
+                            final ArrayList<String> sss33 = util.toStrings(delims);
+                            effectiveDelimiter = sss33.get( sss33.size() - 1 );
+                        } else {
+                            if ( this.verbose ) System.out.println( HDR + "LIST-YAML's Effective-Delimiter Not in this.  Perhaps another one in this optionalsCtxSet(SET)." );
+                            continue; // maybe delimiter is defined another 'optionalsCtx' instance within this 'optionalsCtxSet'(SET)
+                        }
+                        // if ( this.verbose ) System.out.println( HDR + "LIST-YAML's the EFFECTIVE-delim =["+ util.toStrings( delims.get( delims.size()-1 ) ).get(0) +"]" );
+
+                        //------------------------------------------------
+                        // --yamllibrary SnakeYAML --yamllibrary NodeImpl
+                        // Unlike YamlQUoteChar (below), the PARSER-grammer __Collects__ every instance of the '--yamllibrary' option entered by User.
+                        // Flexibility for use means a COMPLEX grammer.
+                        final java.util.List<Token> yamlImps = optionalsCtx.yamlImplementation;
+                        numOfYamlLibrariesFound += yamlImps.size();
+                        // final java.util.List<TerminalNode> yamlImps = optionalsCtx.YAMLLIBRARY_OPT();
+                        if (!yamlImps.isEmpty() && this.verbose) {
+                            System.out.print(HDR + "LIST-YAML's yamlImplementation:- ");
+                            yamlImps.forEach(tk -> System.out.println(tk.getText()));
+                        } else {
+                            if (this.verbose) System.out.print(HDR + "LIST-YAML's yamlImplementation NOT present in this instance within optionalsCtxSet(SET)");
+                        }
+                        // see how to call getText() correctly @ https://github.com/antlr/antlr4/blob/master/doc/faq/parse-trees.md#how-do-i-get-the-input-text-for-a-parse-tree-subtree
+                        try {
+                            yamlImplFound = util.getEffectiveTokenOption(optionalsCtx.yamlImplementation);
+                            if ( this.verbose ) System.out.println( HDR + "LIST-YAML's Effective-YAML-Implementation = ["+ yamlImplFound +"]" );
+                        } catch( java.util.NoSuchElementException e ) {
+                            if ( this.verbose ) System.out.println( HDR + "LIST-YAML's Effective-Delimiter Not in this.  Perhaps another one in this optionalsCtxSet(SET)." );
+                        }
+
+                        final Token yamlQuoteCharToken = optionalsCtx.yamlQuoteChar;
+                        if (this.verbose) System.out.println(HDR + "LIST-YAML's Effective-QuotingChar = [" + yamlQuoteCharToken.getText() + "]");
+                        yamlQuoteChar = yamlQuoteCharToken.getText();
+                        // see how to call getText() correctly @ https://github.com/antlr/antlr4/blob/master/doc/faq/parse-trees.md#how-do-i-get-the-input-text-for-a-parse-tree-subtree
+
+                        final java.util.List<TerminalNode> showStatsOpt = optionalsCtx.SHOWSTATS();
+                        if (this.verbose)  System.out.println(HDR + "LIST-YAML's show-Statistics = [" + (showStatsOpt.size() > 0) + "]");
+                        assertEquals(0, showStatsOpt.size());
+
+                        final java.util.List<TerminalNode> verboseOpt = optionalsCtx.VERBOSE();
+                        if (this.verbose) System.out.println(HDR + "List-YAML's verbose-Count = [" + verboseOpt.size() + "]");
+                        assertEquals(0, verboseOpt.size());
+
+                    } // for loop
+
+                    if (this.verbose) System.out.println(HDR + "LIST-YAML's EFFECTIVE Delimiter = [" + effectiveDelimiter + "]");
+                    assertEquals(2, numOfDelimitersFound );
+                    assertTrue( "\"/\"".equals( effectiveDelimiter ));
+                    if (this.verbose) System.out.println(HDR + "LIST-YAML's numOfYamlLibrariesFound = [" + numOfYamlLibrariesFound + "]");
+                    assertEquals(1, numOfYamlLibrariesFound );
+                    if (this.verbose) System.out.println(HDR + "LIST-YAML's EFFECTIVE yamlQuoteChar = [" + yamlQuoteChar + "]");
+                    assertTrue("'".equals( yamlQuoteChar ) );
 
                     final String inputSrc   = listCtx.inputSrc.getText();   // commonTokenStream.get( regExpPos + ?? ).getText();
                     final String outputSink = listCtx.outputSink.getText(); // commonTokenStream.get( regExpPos + ?? ).getText();
@@ -425,7 +533,7 @@ public class TestYAMLANTLR4 {
                     assertTrue( "path.to/file".equals(outputSink) );
 
                     continue; // !!!!!!!!!!!!!!!!! VERY IMPORTANT !!!!!!!!!!!!!!!!  .. .. as we are UNABLE to rely on a SWITCH-statement.
-                }
+                } // if ( listCtx != null )
 
                 final YAMLANTLR4Parser.Yaml_command_tableContext tblCtx = eachCmdCtx.yaml_command_table();
                 if ( tblCtx != null ) {
@@ -474,12 +582,7 @@ public class TestYAMLANTLR4 {
             // Uncomment the following assertEquals() ONLY AFTER uncommenting the line above for: 'parser.addParseListener( .. )'
             assertTrue( "".equals(errorListener.getOffendingSymbol()) || "null".equals(errorListener.getOffendingSymbol()) || null == errorListener.getOffendingSymbol()  );
 
-        } catch( java.lang.AssertionError e ) { // includes sub-class org.opentest4j.AssertionFailedError
-            e.printStackTrace( System.err );
-            System.err.println( HDR + e.getMessage() );
-            TestYAMLANTLR4.bNoTestFailedSoFar = false;
-            throw e;
-        } catch(Exception e) {
+        } catch( AssertionError | Exception e ) { // AssertionError includes sub-class org.opentest4j.AssertionFailedError
             e.printStackTrace( System.err );
             System.err.println( HDR + e.getMessage() );
             TestYAMLANTLR4.bNoTestFailedSoFar = false;
@@ -517,7 +620,7 @@ public class TestYAMLANTLR4 {
 
             if ( this.verbose ) System.out.println( HDR + "about to parse" );
             final YAMLANTLR4Parser parser = new YAMLANTLR4Parser( commonTokenStream );
-            final YAMLANTLR4ParserUtils util = new YAMLANTLR4ParserUtils( this.verbose );
+            // final YAMLANTLR4ParserUtils util = new YAMLANTLR4ParserUtils( this.verbose );
 
             //==============================================================================
             // NOTE: The "typical" listener should be defined _BEFORE_ invoking 'parser.yaml_command()'
@@ -538,9 +641,6 @@ public class TestYAMLANTLR4 {
             //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
             //==============================================================================
 
-            // TESTING
-            int ii = 0;
-
             for (YAMLANTLR4Parser.Yaml_commandContext eachCmdCtx: cmdsCtx ) {
 
                 // JUnit's Jupiter's Assumptions are used to run tests only if certain conditions are met. 
@@ -560,8 +660,8 @@ public class TestYAMLANTLR4 {
                 }
 
                 // since this test is about defective tokens entered by users.. we should NOT be getting here.
-                assertTrue( false );
-                
+                fail(); // test failed
+
                 final YAMLANTLR4Parser.Yaml_command_readContext readCtx = eachCmdCtx.yaml_command_read();
                 if ( readCtx != null ) {
                     if ( this.verbose ) System.out.println( HDR + " yaml READ command detected!" );
@@ -579,12 +679,7 @@ public class TestYAMLANTLR4 {
         // } catch( java.lang.InterruptedException e ) {
         //     e.printStackTrace( System.err );
         //     System.err.println( HDR + e.getMessage() );
-        } catch( java.lang.AssertionError e ) { // includes sub-class org.opentest4j.AssertionFailedError
-            e.printStackTrace( System.err );
-            System.err.println( HDR + e.getMessage() );
-            TestYAMLANTLR4.bNoTestFailedSoFar = false;
-            throw e;
-        } catch(Exception e) {
+        } catch( AssertionError | Exception e ) { // AssertionError includes sub-class org.opentest4j.AssertionFailedError
             e.printStackTrace( System.err );
             System.err.println( HDR + e.getMessage() );
             TestYAMLANTLR4.bNoTestFailedSoFar = false;
