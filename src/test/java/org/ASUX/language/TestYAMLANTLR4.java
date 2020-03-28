@@ -221,7 +221,7 @@ public class TestYAMLANTLR4 {
                     assertEquals(YAMLANTLR4Lexer.ANYWORD,           commonTokenStream.get(ii++).getType());
                     assertEquals(YAMLANTLR4Lexer.VERBOSE,           commonTokenStream.get(ii++).getType());
                     assertEquals(YAMLANTLR4Lexer.DELIMITER_OPT,     commonTokenStream.get(ii++).getType());
-                    assertEquals(YAMLANTLR4Lexer.DOUBLEQUOTEDTEXT,  commonTokenStream.get(ii++).getType());
+                    assertEquals(YAMLANTLR4Lexer.COMMA,             commonTokenStream.get(ii++).getType());
                     assertEquals(YAMLANTLR4Lexer.SHOWSTATS,         commonTokenStream.get(ii++).getType());
                     assertEquals(YAMLANTLR4Lexer.VERBOSE,           commonTokenStream.get(ii++).getType());
                     assertEquals(YAMLANTLR4Lexer.INPUT_FROM,        commonTokenStream.get(ii++).getType());
@@ -257,7 +257,7 @@ public class TestYAMLANTLR4 {
 
                         // Here in READYAML, only one delimiter-option is provided.
                         // But, below in LIST-YAML, multiple instance of the '--delimiter' option entered by User.
-                        final java.util.List<YAMLANTLR4Parser.Any_quoted_textContext> delims = optionalsCtx.delimiter;
+                        final java.util.List<YAMLANTLR4Parser.Delimiter_textContext> delims = optionalsCtx.delimiter;
                         if ( this.verbose ) System.out.print( HDR + "\tRead-YAML's Delimiters:- " );
                         // does NOT WORK: delims.forEach( d -> System.out.println(d.getText()) );
                         delims.forEach( delim -> { final ArrayList<String> sss33 = util.toStrings( delim ); sss33.forEach( System.err::println); } );
@@ -269,7 +269,8 @@ public class TestYAMLANTLR4 {
                             // continue; // maybe delimiter is defined another 'optionalsCtx' instance within this 'optionalsCtxSet'(SET)
                         }
                     }
-                    assertTrue( "\"/\"".equals(delimiterFound) );
+                    Assertions.assertEquals(",", delimiterFound );
+                    // assertTrue( "\"/\"".equals(delimiterFound) );
 
                     //=================================================================
 // // REF: https://github.com/antlr/antlr4/blob/master/doc/tree-matching.md
@@ -312,6 +313,8 @@ public class TestYAMLANTLR4 {
 //                     // if ( this.verbose ) matches99.forEach( ptree -> System.out.println( HDR + "#1(matcher) //yaml_command/*/optionals >> "+ ptree ) );
 
                     //=================================================================
+// !!!!!!!!!!!!! ATTENTION !!!!!!!!!!!!!!!!!!!!!
+// The XPath will MATCH __ALL__ the YAML commands in the file!!!!!
                     final java.util.Collection<ParseTree> xpathQRes = org.antlr.v4.runtime.tree.xpath.XPath.findAll( topmostCtx, "//yaml_command/*/optionals", parser );
                     if ( this.verbose ) xpathQRes.forEach( ptree -> System.out.println( HDR + "#2(XPath.findAll) //yaml_command/*/optionals >> "+ ptree.getText() ) );
                     // XPATH-EXAMPLE = //'return'   :means: any 'return' literal in tree
@@ -322,7 +325,7 @@ public class TestYAMLANTLR4 {
                         usersInput = iterator.next().getText();
                         if (this.verbose)  System.out.println(HDR + "org.antlr.v4.runtime.tree.xpath.XPath.findAll(verbose/delimiter/showStats): usersInput identified as = [" + usersInput + "]");
                         if ( usersInput != null && usersInput.trim().length() != 0 ) {
-                            assertTrue( "--verbose--delimiter\"/\"--showStats-v".equals( usersInput ) ||
+                            assertTrue( "--verbose--delimiter,--showStats-v".equals( usersInput ) ||
                                     "--delimiter\"JUNKSTR\"-d\"/\"--yamllibrarySnakeYAML'".equals( usersInput ) ); // <<----------- !!!!!!!!!!!!!!!!  The test !!!!!!!!!!!!
                         }
                     } // while
@@ -459,7 +462,7 @@ public class TestYAMLANTLR4 {
                         // --delimiter 'JunkString' -d ","
                         // Unlike YamlQUoteChar (below), the PARSER-grammer __Collects__ every instance of the '--delimiter' option entered by User.
                         // Flexibility for use means a COMPLEX grammer.
-                        final java.util.List<YAMLANTLR4Parser.Any_quoted_textContext> delims = optionalsCtx.delimiter;
+                        final java.util.List<YAMLANTLR4Parser.Delimiter_textContext> delims = optionalsCtx.delimiter;
 
                         if (this.verbose) {
                             System.out.print(HDR + "\tLIST-YAML's Delimiters:- ");
