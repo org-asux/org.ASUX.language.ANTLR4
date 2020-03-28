@@ -59,9 +59,9 @@ options { tokenVocab= YAMLANTLR4Lexer; }
 	PARSER RULES (all LOWERcase)
    ================================== */
 
-yaml_commands : yaml_command+ EOF ;
+yaml_commands : yaml_command ( SEMICOLON  NEWLINE*  yaml_command )* EOF ;
 
-yaml_command: ( yaml_command_read | yaml_command_list | yaml_command_delete | yaml_command_replace | yaml_command_insert | yaml_command_macro | yaml_command_table ) SEMICOLON NEWLINE* ;
+yaml_command: ( yaml_command_read | yaml_command_list | yaml_command_delete | yaml_command_replace | yaml_command_insert | yaml_command_macro | yaml_command_table )  ;
 
 yaml_command_read:	    optionals   YAML optionals YAML_READ	optionals   regularexpression	(PROJECT projectionpath)? optionals INPUT_FROM inputSrc=(HYPHEN|FILEPATH) OUTPUT_TO outputSink=(HYPHEN|FILEPATH)  optionals;
 yaml_command_list:	    optionals   YAML optionals YAML_LIST 	optionals   regularexpression               optionals INPUT_FROM inputSrc=(HYPHEN|FILEPATH) OUTPUT_TO outputSink=(HYPHEN|FILEPATH)   optionals;
