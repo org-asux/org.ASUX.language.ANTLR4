@@ -120,15 +120,24 @@ fragment CHAR_NONQUOTE_NONWS :	~['" \t\n\r] ; // Not a quote, Not a whitespace c
 
 NUMBER : DIGIT+ ( [.,] DIGIT+ )* ;
 
-fragment FILEPATHCHAR : ( UNICODECHAR | UNICODEDIGIT | UPPERCASE | LOWERCASE | [_.,@%+=()-] ) ;
+fragment FILEPATHCHAR : ( UNICODECHAR | UNICODEDIGIT | UPPERCASE | LOWERCASE | COMMA | AT | PERCENT | UNDERSCORE | [.+=()-] ) ;
 
 // ==================================
 
+DELIMITER_CHAR : COMMA | COLON | AT | SLASH | PERCENT | UNDERSCORE | PERIOD ;
+// !!!!!! Warning.  Do NOT add 'SEMICOLON' to the list of delimiters.
+
+HYPHEN    : '-' ;
 COMMA	  : ',' ;
 COLON	  : ':' ;
 SEMICOLON : ';' ;
 JSONBEGIN : '{' ;
 JSONEND   : '}' ;
+SLASH     : '/' ;
+AT        : '@' ;
+PERCENT   : '%' ;
+UNDERSCORE: '_' ;
+PERIOD    : '.' ;
 TAB       : '\t';
 
 // ==================================
@@ -145,8 +154,6 @@ DOUBLESINGLEQUOTEDTEXT : DOUBLEQUOTE NONQUOTEDTEXT ( SINGLEQUOTEDTEXT | SINGLEDO
 // !!!! WARNING. 'FILEPATH' does NOT allow a SIMPLE-file-name (which will be considered 'ANYWORD' or 'SINGLEQUOTEDTEXT')
 
 FILEPATH : '/'? FILEPATHCHAR+ ( '/' FILEPATHCHAR+ )+ ;
-
-DELIMITER_CHAR : COMMA | COLON | SEMICOLON | [_.@%/~] ;
 
 // ==================================
 
