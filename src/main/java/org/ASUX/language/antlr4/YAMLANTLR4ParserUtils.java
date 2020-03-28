@@ -33,6 +33,7 @@
 package org.ASUX.language.antlr4;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import org.antlr.v4.runtime.*;      // https://www.antlr.org/api/Java/org/antlr/v4/runtime/package-summary.html
                                     // https://www.antlr.org/api/Java/org/antlr/v4/runtime/CommonTokenStream.html
@@ -111,8 +112,9 @@ public class YAMLANTLR4ParserUtils {
      * <code>class RegularexpressionContext extends ParserRuleContext</code><br>
      * <code>class OptionalsContext extends ParserRuleContext</code><br>
      * Many of my ASUX-YAML Parser constructs have heirarchy of parser-tokens (before we get to the Lexer-Tokens).  ALmost of my parser-constructs match just one Lexer-token, just that we do Not know which one.<br>
-     * This method is a generic way to get the Lexer-token.<br>
-     * See <a href="https://www.antlr.org/api/Java/org/antlr/v4/runtime/ParserRuleContext.html">https://www.antlr.org/api/Java/org/antlr/v4/runtime/ParserRuleContext.html</a>
+     * This method is a generic way to get the Stringified Lexer-token.</p>
+     * <p>See <a href="https://www.antlr.org/api/Java/org/antlr/v4/runtime/ParserRuleContext.html">https://www.antlr.org/api/Java/org/antlr/v4/runtime/ParserRuleContext.html</a></p>
+     * <p>See also {@link #toStrings(List)}</p>
      * @param _prc NotNull instance obtained from top-level context object.
      * @return NotNull ArrayList&lt;String&gt;, _EVEN IF_ something went wrong (in which case, you'll get a RuntimeException)
      * @throws RuntimeException typically this should lead to a bug-report
@@ -125,6 +127,26 @@ public class YAMLANTLR4ParserUtils {
             s.add( ptObj.getText() );
         // see how to call getText() correctly @ https://github.com/antlr/antlr4/blob/master/doc/faq/parse-trees.md#how-do-i-get-the-input-text-for-a-parse-tree-subtree
     }
+        return s;
+    }
+
+    //==============================================================================
+
+    /**
+     * <code>class RegularexpressionContext extends ParserRuleContext</code><br>
+     * <code>class OptionalsContext extends ParserRuleContext</code><br>
+     * <p>Many of my ASUX-YAML Parser constructs have heirarchy of parser-tokens (before we get to the Lexer-Tokens).  Almost of my parser-constructs match just one Lexer-token, just that we do Not know which one.<br>
+     * This method is a generic way to get the Stringified form of a List-of-Lexer-tokens.</p>
+     * <p>See also {@link #toStrings(ParserRuleContext)}</p>
+     * @param _prc NotNull instance obtained from top-level context object.
+     * @return NotNull ArrayList&lt;String&gt;, _EVEN IF_ something went wrong (in which case, you'll get a RuntimeException)
+     * @throws RuntimeException typically this should lead to a bug-report
+     */
+    public <T extends ParserRuleContext> ArrayList<String> toStrings( final java.util.List<T> _prc ) throws RuntimeException {
+        final ArrayList<String> s = new ArrayList<>();
+        for ( T ix: _prc ) {
+            s.addAll( this.toStrings( ix ) );
+        }
         return s;
     }
 
