@@ -179,16 +179,18 @@ public class TestYAMLANTLR4 {
                 // void	syntaxError(Recognizer<?,?> recognizer, Object offendingSymbol, int line, int charPositionInLine, String msg, RecognitionException e)
                 // Upon syntax error, notify any interested parties.
 
-                //==============================================================================
+            //==============================================================================
             //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
             //==============================================================================
 
-            // TESTING
-            int ii = 0;
+            // for debugging purposes
+            int lineNum = 0;
+            int tokenNum = 0;
 
             for (YAMLANTLR4Parser.Yaml_commandContext eachCmdCtx: cmdsCtx ) {
+                lineNum ++;
 
-                // JUnit's Jupiter's Assumptions are used to run tests only if certain conditions are met. 
+                // JUnit's Jupiter's Assumptions are used to run tests only if certain conditions are met.
                 if ( this.verbose ) System.out.println( HDR + " TestYAMLANTLR4.bNoTestFailedSoFar = "+ TestYAMLANTLR4.bNoTestFailedSoFar );
                 assumeTrue( TestYAMLANTLR4.bNoTestFailedSoFar );
                 // above throws the Exception:-  org.junit.AssumptionViolatedException: got: <false>, expected: is <true>
@@ -211,25 +213,30 @@ public class TestYAMLANTLR4 {
                 final YAMLANTLR4Parser.Yaml_command_readContext readCtx = eachCmdCtx.yaml_command_read();
                 if ( readCtx != null ) {
                     if ( this.verbose ) System.out.println( HDR + " yaml READ command detected!" );
-                    if ( this.verbose ) System.out.println( HDR + "about to run LEXER's ASSERT-checks" );
-                    assertEquals(YAMLANTLR4Lexer.YAML,              commonTokenStream.get(ii++).getType());
-                    assertEquals(YAMLANTLR4Lexer.YAML_READ,         commonTokenStream.get(ii++).getType());
-                    final int regExpPos = ii;
-                    // assertTrue( YAMLANTLR4Lexer.REG ULAR EXP RESSION == commonTokenStream.get( ii++ ).getType() ); // no longer have such a token.  Instead it's a parser element.
-                    assertEquals(YAMLANTLR4Lexer.SINGLEDOUBLEQUOTEDTEXT, commonTokenStream.get(ii++).getType());
-                    assertEquals(YAMLANTLR4Lexer.PROJECT,           commonTokenStream.get(ii++).getType());
-                    assertEquals(YAMLANTLR4Lexer.ANYWORD,           commonTokenStream.get(ii++).getType());
-                    assertEquals(YAMLANTLR4Lexer.VERBOSE,           commonTokenStream.get(ii++).getType());
-                    assertEquals(YAMLANTLR4Lexer.DELIMITER_OPT,     commonTokenStream.get(ii++).getType());
-                    assertEquals(YAMLANTLR4Lexer.COMMA,             commonTokenStream.get(ii++).getType());
-                    assertEquals(YAMLANTLR4Lexer.SHOWSTATS,         commonTokenStream.get(ii++).getType());
-                    assertEquals(YAMLANTLR4Lexer.VERBOSE,           commonTokenStream.get(ii++).getType());
-                    assertEquals(YAMLANTLR4Lexer.INPUT_FROM,        commonTokenStream.get(ii++).getType());
-                    assertEquals(YAMLANTLR4Lexer.FILEPATH,          commonTokenStream.get(ii++).getType());
-                    assertEquals(YAMLANTLR4Lexer.OUTPUT_TO,         commonTokenStream.get(ii++).getType());
-                    assertEquals(YAMLANTLR4Lexer.FILEPATH,          commonTokenStream.get(ii++).getType());
-                    assertEquals(YAMLANTLR4Lexer.SEMICOLON,         commonTokenStream.get(ii++).getType());
-                    // assertTrue( YAMLANTLR4Lexer.NEWLINE    ==    commonTokenStream.get( ii++ ).getType() ); // Grammer/Lexer rules updated to IGNORE all WhiteSpace, incl. NEWLINE
+                    if ( this.verbose ) System.out.println( HDR + "about to run LEXER's ASSERT-checks (tokenNum="+ tokenNum +")." );
+
+                    final int regExpPos = ( lineNum == 1 ) ? tokenNum + 2 : tokenNum + 5 ;
+                    if ( lineNum == 1 ) { // 1st test-input LINE only
+                        assertEquals(YAMLANTLR4Lexer.YAML,              commonTokenStream.get(tokenNum++).getType());
+                        assertEquals(YAMLANTLR4Lexer.YAML_READ,         commonTokenStream.get(tokenNum++).getType());
+                        // assertTrue( YAMLANTLR4Lexer.REG ULAR EXP RESSION == commonTokenStream.get( tokenNum++ ).getType() ); // no longer have such a token.  Instead it's a parser element.
+                        assertEquals(YAMLANTLR4Lexer.SINGLEDOUBLEQUOTEDTEXT, commonTokenStream.get(tokenNum++).getType());
+                        assertEquals(YAMLANTLR4Lexer.PROJECT,           commonTokenStream.get(tokenNum++).getType());
+                        assertEquals(YAMLANTLR4Lexer.ANYWORD,           commonTokenStream.get(tokenNum++).getType());
+                        assertEquals(YAMLANTLR4Lexer.VERBOSE,           commonTokenStream.get(tokenNum++).getType());
+                        assertEquals(YAMLANTLR4Lexer.DELIMITER_OPT,     commonTokenStream.get(tokenNum++).getType());
+                        assertEquals(YAMLANTLR4Lexer.DELIMITER_CHAR,    commonTokenStream.get(tokenNum++).getType());
+                        assertEquals(YAMLANTLR4Lexer.SHOWSTATS,         commonTokenStream.get(tokenNum++).getType());
+                        assertEquals(YAMLANTLR4Lexer.VERBOSE,           commonTokenStream.get(tokenNum++).getType());
+                        assertEquals(YAMLANTLR4Lexer.INPUT_FROM,        commonTokenStream.get(tokenNum++).getType());
+                        assertEquals(YAMLANTLR4Lexer.FILEPATH,          commonTokenStream.get(tokenNum++).getType());
+                        assertEquals(YAMLANTLR4Lexer.OUTPUT_TO,         commonTokenStream.get(tokenNum++).getType());
+                        assertEquals(YAMLANTLR4Lexer.FILEPATH,          commonTokenStream.get(tokenNum++).getType());
+                        assertEquals(YAMLANTLR4Lexer.SEMICOLON,         commonTokenStream.get(tokenNum++).getType());
+                        // assertTrue( YAMLANTLR4Lexer.NEWLINE    ==    commonTokenStream.get( tokenNum++ ).getType() ); // Grammer/Lexer rules updated to IGNORE all WhiteSpace, incl. NEWLINE
+                    }
+                    if ( lineNum == 2 ) tokenNum += 14;
+
                     // if ( this.verbose ) System.out.println( HDR + "readCtx ="+ readCtx ); // USELESS DEBUG STATEMENT.  You'll see something like: [33 26]
                     final YAMLANTLR4Parser.RegularexpressionContext regExpCtx = readCtx.regularexpression();
                     final String regExpStr = commonTokenStream.get( regExpPos ).getText();
@@ -241,12 +248,14 @@ public class TestYAMLANTLR4 {
                     assertEquals(1, sss.size());
                     final String s = sss.get( 0 );
                     // if ( this.verbose ) System.out.println( HDR + "Read-YAML's REGEXPstring(from Parser) =["+ s +"] " );
-                    assertTrue( s.equals( regExpStr ) );
-                    assertEquals("'/reg/\"exp\"/g'", s);
+                    assertEquals( s, regExpStr );
+                    if ( lineNum == 1 ) assertEquals("'/reg/\"exp\"/g'", s); // 1st line in TEST INPUT-FILE
+                    if ( lineNum == 2 ) assertEquals("paths,/pet", s);       // 1st line in TEST INPUT-FILE
 
                     final java.util.List<YAMLANTLR4Parser.OptionalsContext> optionalsCtxSet = readCtx.optionals();
                     final ArrayList<String> sss22 = util.toStrings( optionalsCtxSet );
-                    Assertions.assertEquals(5, sss22.size());
+                    if ( lineNum == 1 ) assertEquals(5, sss22.size());
+                    if ( lineNum == 2 ) assertEquals(6, sss22.size());
                     if (this.verbose) {
                         System.out.println(HDR + "\tRead-YAML's OPTIONALs:- ");
                         sss22.forEach(System.out::println);
@@ -325,9 +334,13 @@ public class TestYAMLANTLR4 {
                         usersInput = iterator.next().getText();
                         if (this.verbose)  System.out.println(HDR + "org.antlr.v4.runtime.tree.xpath.XPath.findAll(verbose/delimiter/showStats): usersInput identified as = [" + usersInput + "]");
                         if ( usersInput != null && usersInput.trim().length() != 0 ) {
-                            assertTrue( "--verbose--delimiter,--showStats-v".equals( usersInput ) ||
-                                    "--delimiter\"JUNKSTR\"-d\"/\"--yamllibrarySnakeYAML'".equals( usersInput ) ); // <<----------- !!!!!!!!!!!!!!!!  The test !!!!!!!!!!!!
-                        }
+                            assertTrue( "--verbose--delimiter,--showStats-v".equals( usersInput )
+                                    || "--verbose--yamllibrarySnakeYAML".equals( usersInput )
+                                    || "--verbose--delimiter,".equals( usersInput )
+                                    || "--delimiter\"JUNKSTR\"-d\"/\"--yamllibrarySnakeYAML'".equals( usersInput )
+                                    ); // <<----------- !!!!!!!!!!!!!!!!  The test !!!!!!!!!!!!
+// !!!!!!!!!!!!! Attention: the above asse rtTrue() must address __ALL__ the input lines (even tho' we're iterating over each line.  Reason: XPATH does Not work that way!!!
+                        } // if
                     } // while
 // org.ASUX.language.TestYAMLANTLR4.testYAMLCommands():	org.antlr.v4.runtime.tree.xpath.XPath.findAll(verbose/delimiter/showStats): usersInput identified as = []
 // org.ASUX.language.TestYAMLANTLR4.testYAMLCommands():	org.antlr.v4.runtime.tree.xpath.XPath.findAll(verbose/delimiter/showStats): usersInput identified as = []
@@ -399,40 +412,43 @@ public class TestYAMLANTLR4 {
                         if (this.verbose) System.out.println(HDR + "Read-YAML's verbose-Count = [" + verboseCmdLineOptionCount + "]");
                     }
                     assertEquals(2, verboseCmdLineOptionCount );
-                    assertTrue( bShowStatsCmdLineOptionFound );
+                    if ( lineNum == 1 ) assertTrue( bShowStatsCmdLineOptionFound );
 
                     // see how to call getText() correctly @ https://github.com/antlr/antlr4/blob/master/doc/faq/parse-trees.md#how-do-i-get-the-input-text-for-a-parse-tree-subtree
                     final String inputSrc   = readCtx.inputSrc.getText();   // commonTokenStream.get( regExpPos + ?? ).getText();
                     final String outputSink = readCtx.outputSink.getText(); // commonTokenStream.get( regExpPos + ?? ).getText();
                     if ( this.verbose ) System.out.println( HDR + "Read-YAML's InputSOURCE =["+ inputSrc +"] OutputSink=["+ outputSink +"]" );
-                    assertTrue( "@/file/name".equals(inputSrc) );
-                    assertTrue( "path.to/file".equals(outputSink) );
+                    if ( lineNum == 1 ) assertTrue( "@/file/name".equals(inputSrc) );
+                    if ( lineNum == 1 ) assertTrue( "path.to/file".equals(outputSink) );
+                    if ( lineNum == 2 ) assertTrue( "inputs/nano.yaml".equals(inputSrc) );
+                    if ( lineNum == 2 ) assertTrue( "-".equals(outputSink) );
 
+                    if ( this.verbose ) System.out.println( HDR + "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! tokenNum = "+ tokenNum );
                     continue; // !!!!!!!!!!!!!!!!! VERY IMPORTANT !!!!!!!!!!!!!!!!  .. .. as we are UNABLE to rely on a SWITCH-statement.
                 }
 
                 final YAMLANTLR4Parser.Yaml_command_listContext listCtx = eachCmdCtx.yaml_command_list();
                 if ( listCtx != null ) {
-                    if ( this.verbose ) System.out.println( HDR + "yaml LIST command detected! ii = "+ ii );
-                    assertEquals(15, ii);  // this YAML_LIST command .. follows the 10 tokens for YAML_READ
+                    if ( this.verbose ) System.out.println( HDR + "yaml LIST command detected! tokenNum = "+ tokenNum );
+                    assertEquals(29, tokenNum);  // this YAML_LIST command .. follows the 10 tokens for YAML_READ
                     if ( this.verbose ) System.out.println( HDR + "about to run LEXER's ASSERT-checks" );
-                    assertEquals(YAMLANTLR4Lexer.YAML, commonTokenStream.get(ii++).getType());
-                    assertEquals(YAMLANTLR4Lexer.YAML_LIST, commonTokenStream.get(ii++).getType());
-                    final int regExpPos = ii;
-                    assertEquals(YAMLANTLR4Lexer.SINGLEQUOTEDTEXT, commonTokenStream.get(ii++).getType()); // Note the difference in TOKEN-name here vs. the one 9 lines above.
-                    assertEquals(YAMLANTLR4Lexer.DELIMITER_OPT, commonTokenStream.get(ii++).getType());
-                    assertEquals(YAMLANTLR4Lexer.DOUBLEQUOTEDTEXT, commonTokenStream.get(ii++).getType());
-                    assertEquals(YAMLANTLR4Lexer.DELIMITER_OPT, commonTokenStream.get(ii++).getType());
-                    assertEquals(YAMLANTLR4Lexer.DOUBLEQUOTEDTEXT, commonTokenStream.get(ii++).getType());
-                    assertEquals(YAMLANTLR4Lexer.YAMLLIBRARY_OPT, commonTokenStream.get(ii++).getType());
-                    assertEquals(YAMLANTLR4Lexer.YAMLLIBRARY_LIST, commonTokenStream.get(ii++).getType());
-                    assertEquals(YAMLANTLR4Lexer.QUOTEYAMLCONTENT, commonTokenStream.get(ii++).getType());
-                    assertEquals(YAMLANTLR4Lexer.INPUT_FROM, commonTokenStream.get(ii++).getType());
-                    assertEquals(YAMLANTLR4Lexer.FILEPATH, commonTokenStream.get(ii++).getType());
-                    assertEquals(YAMLANTLR4Lexer.OUTPUT_TO, commonTokenStream.get(ii++).getType());
-                    assertEquals(YAMLANTLR4Lexer.FILEPATH, commonTokenStream.get(ii++).getType());
-                    assertEquals(YAMLANTLR4Lexer.SEMICOLON, commonTokenStream.get(ii++).getType());
-                    // assertTrue( YAMLANTLR4Lexer.NEWLINE    == commonTokenStream.get( ii++ ).getType() ); // Grammer/Lexer rules updated to IGNORE all WhiteSpace, incl. NEWLINE
+                    assertEquals(YAMLANTLR4Lexer.YAML,              commonTokenStream.get(tokenNum++).getType());
+                    assertEquals(YAMLANTLR4Lexer.YAML_LIST,         commonTokenStream.get(tokenNum++).getType());
+                    final int regExpPos = tokenNum;
+                    assertEquals(YAMLANTLR4Lexer.SINGLEQUOTEDTEXT,  commonTokenStream.get(tokenNum++).getType()); // Note the difference in TOKEN-name here vs. the one 9 lines above.
+                    assertEquals(YAMLANTLR4Lexer.DELIMITER_OPT,     commonTokenStream.get(tokenNum++).getType());
+                    assertEquals(YAMLANTLR4Lexer.DOUBLEQUOTEDTEXT,  commonTokenStream.get(tokenNum++).getType());
+                    assertEquals(YAMLANTLR4Lexer.DELIMITER_OPT,     commonTokenStream.get(tokenNum++).getType());
+                    assertEquals(YAMLANTLR4Lexer.DOUBLEQUOTEDTEXT,  commonTokenStream.get(tokenNum++).getType());
+                    assertEquals(YAMLANTLR4Lexer.YAMLLIBRARY_OPT,   commonTokenStream.get(tokenNum++).getType());
+                    assertEquals(YAMLANTLR4Lexer.YAMLLIBRARY_LIST,  commonTokenStream.get(tokenNum++).getType());
+                    assertEquals(YAMLANTLR4Lexer.QUOTEYAMLCONTENT,  commonTokenStream.get(tokenNum++).getType());
+                    assertEquals(YAMLANTLR4Lexer.INPUT_FROM,        commonTokenStream.get(tokenNum++).getType());
+                    assertEquals(YAMLANTLR4Lexer.FILEPATH,          commonTokenStream.get(tokenNum++).getType());
+                    assertEquals(YAMLANTLR4Lexer.OUTPUT_TO,         commonTokenStream.get(tokenNum++).getType());
+                    assertEquals(YAMLANTLR4Lexer.FILEPATH,          commonTokenStream.get(tokenNum++).getType());
+                    assertEquals(YAMLANTLR4Lexer.SEMICOLON,         commonTokenStream.get(tokenNum++).getType());
+                    // assertTrue( YAMLANTLR4Lexer.NEWLINE    == commonTokenStream.get( tokenNum++ ).getType() ); // Grammer/Lexer rules updated to IGNORE all WhiteSpace, incl. NEWLINE
                     // if ( this.verbose ) System.out.println( HDR + "listCtx ="+ listCtx ); // USELESS DEBUG STATEMENT.  You'll see something like: [34 26]
                     final YAMLANTLR4Parser.RegularexpressionContext regExpCtx = listCtx.regularexpression();
                     final String regExpStr = commonTokenStream.get( regExpPos ).getText();
@@ -541,13 +557,13 @@ public class TestYAMLANTLR4 {
                 final YAMLANTLR4Parser.Yaml_command_tableContext tblCtx = eachCmdCtx.yaml_command_table();
                 if ( tblCtx != null ) {
                     if ( this.verbose ) System.out.println( HDR + "yaml TABLE command detected!" );
-                    // assertTrue( ii == 23 ); // this YAML_TABLE command .. follows the 8 tokens for YAML_READ + 8 for YAML_LIST
+                    // assertTrue( tokenNum == 23 ); // this YAML_TABLE command .. follows the 8 tokens for YAML_READ + 8 for YAML_LIST
                     // if ( this.verbose ) System.out.println( HDR + "about to run LEXER's ASSERT-checks" );
-                    // assertTrue( YAMLANTLR4Lexer.YAML          == commonTokenStream.get( ii++ ).getType() );
-                    // assertTrue( YAMLANTLR4Lexer.YAML_TABLE    == commonTokenStream.get( ii++ ).getType() );
-                    // assertTrue( YAMLANTLR4Lexer.SEMICOLON     == commonTokenStream.get( ii++ ).getType() );
-                    // // assertTrue( YAMLANTLR4Lexer.NEWLINE    == commonTokenStream.get( ii++ ).getType() );
-                    // assertTrue( YAMLANTLR4Lexer.EOF           == commonTokenStream.get( ii++ ).getType() );
+                    // assertTrue( YAMLANTLR4Lexer.YAML          == commonTokenStream.get( tokenNum++ ).getType() );
+                    // assertTrue( YAMLANTLR4Lexer.YAML_TABLE    == commonTokenStream.get( tokenNum++ ).getType() );
+                    // assertTrue( YAMLANTLR4Lexer.SEMICOLON     == commonTokenStream.get( tokenNum++ ).getType() );
+                    // // assertTrue( YAMLANTLR4Lexer.NEWLINE    == commonTokenStream.get( tokenNum++ ).getType() );
+                    // assertTrue( YAMLANTLR4Lexer.EOF           == commonTokenStream.get( tokenNum++ ).getType() );
                     if ( this.verbose ) System.out.println( HDR + "tblCtx ="+ tblCtx );
 
                     continue; // !!!!!!!!!!!!!!!!! VERY IMPORTANT !!!!!!!!!!!!!!!!  .. .. as we are UNABLE to rely on a SWITCH-statement.
