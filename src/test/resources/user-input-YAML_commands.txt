@@ -1,2 +1,3 @@
 yaml read '/reg/"exp"/g' -p .. --verbose --delimiter , --showStats -v < @/file/name > path.to/file ;
+--verbose --yamllibrary SnakeYAML yaml read paths,/pet --verbose --delimiter , --input inputs/nano.yaml -o - ;
 yaml list '/2reg/expresssion' --delimiter "JUNKSTR" -d "/" --yamllibrary SnakeYAML --single-quote -i @/file/name --output path.to/file ;
