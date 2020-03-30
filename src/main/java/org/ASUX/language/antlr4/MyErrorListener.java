@@ -33,6 +33,9 @@
 package org.ASUX.language.antlr4;
 
 import org.antlr.v4.runtime.*;      // https://www.antlr.org/api/Java/org/antlr/v4/runtime/package-summary.html
+import org.antlr.v4.runtime.tree.ParseTreeListener;
+
+import java.util.List;
 
 
 //==============================================================================
@@ -53,7 +56,7 @@ public class MyErrorListener extends BaseErrorListener // org.antlr.v4.runtime.B
     
     public boolean verbose = true;
 
-    private final MyYAMLParserListener listener;
+    private final List<ParseTreeListener> listeners;
     private boolean bSyntaxError;
     private String offendingSymbol = null;
     // private StringWriter _stream;
@@ -63,11 +66,11 @@ public class MyErrorListener extends BaseErrorListener // org.antlr.v4.runtime.B
     //==============================================================================
 
     public MyErrorListener(   final boolean _verbose
-                            , final MyYAMLParserListener _listener
+                            , final List<ParseTreeListener> _listeners
                             // , final StringWriter _stream
                             ) {
         this.verbose = _verbose;
-        this.listener = _listener;
+        this.listeners = _listeners;
         this.bSyntaxError = false;
         this.offendingSymbol = null;
         //     this._stream = stream;
@@ -106,10 +109,10 @@ public class MyErrorListener extends BaseErrorListener // org.antlr.v4.runtime.B
 
 
     // if ( typeOfOffendingSymbol == "org.antlr.v4.runtime.CommonToken" ) {
-        if ( _offendingSymbol instanceof org.antlr.v4.runtime.CommonToken ) {
+        if ( _offendingSymbol instanceof CommonToken ) {
             final CommonToken token = (CommonToken) _offendingSymbol;
             // token.getText();      // see https://github.com/antlr/antlr4/blob/master/doc/faq/parse-trees.md#how-do-i-get-the-input-text-for-a-parse-tree-subtree
-            final String tokensSuccessfullyParsedSoFar = ( this.listener == null ) ? "<Undefined>" : this.listener.getTokensSuccessfullyParsedSoFar();
+            final String tokensSuccessfullyParsedSoFar = "<incomplete-code>"; // myParseListener.getTokensSuccessfullyParsedSoFar();
             System.err.println( "Error: Unexpected '"+ token.getText() +"' noted after: "+ tokensSuccessfullyParsedSoFar );
             this.offendingSymbol = token.getText();
         // } else if ( _offendingSymbol instanceof ParserRuleContext ) {
