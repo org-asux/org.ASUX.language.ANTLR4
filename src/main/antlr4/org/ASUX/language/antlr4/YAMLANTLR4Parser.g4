@@ -61,33 +61,29 @@ options { tokenVocab= YAMLANTLR4Lexer; }
 
 yaml_commands : yaml_command ( SEMICOLON  NEWLINE*  yaml_command )* EOF ;
 
-yaml_command: ( yaml_command_read | yaml_command_list | yaml_command_delete | yaml_command_replace | yaml_command_insert | yaml_command_macro | yaml_command_table )  ;
+yaml_command: ( yaml_command_read | yaml_command_list | yaml_command_delete | yaml_command_replace | yaml_command_insert | yaml_command_macro | yaml_command_table | yaml_command_batch )  ;
 
 yaml_command_read:	    optionals   YAML optionals YAML_READ	optionals   regularexpression	(PROJECT projectionpath)? optionals INPUT_FROM inputSrc=(HYPHEN|FILEPATH) OUTPUT_TO outputSink=(HYPHEN|FILEPATH)  optionals;
 yaml_command_list:	    optionals   YAML optionals YAML_LIST 	optionals   regularexpression               optionals INPUT_FROM inputSrc=(HYPHEN|FILEPATH) OUTPUT_TO outputSink=(HYPHEN|FILEPATH)   optionals;
 yaml_command_delete:	optionals   YAML optionals YAML_DELETE  optionals   regularexpression               optionals INPUT_FROM inputSrc=(HYPHEN|FILEPATH) OUTPUT_TO outputSink=(HYPHEN|FILEPATH)   optionals;
 yaml_command_replace:	optionals   YAML optionals YAML_REPLACE optionals   regularexpression newcontent	optionals INPUT_FROM inputSrc=(HYPHEN|FILEPATH) OUTPUT_TO outputSink=(HYPHEN|FILEPATH)   optionals;
 yaml_command_insert:	optionals   YAML optionals YAML_INSERT  optionals   regularexpression newcontent	optionals INPUT_FROM inputSrc=(HYPHEN|FILEPATH) OUTPUT_TO outputSink=(HYPHEN|FILEPATH)   optionals;
-yaml_command_table: 	optionals   YAML optionals YAML_TABLE   optionals   regularexpression columns	    optionals INPUT_FROM inputSrc=(HYPHEN|FILEPATH) OUTPUT_TO outputSink=(HYPHEN|FILEPATH)   optionals;
-yaml_command_macro:	    optionals   YAML optionals YAML_MACRO   optionals   macroProperties=FILEPATH		optionals INPUT_FROM inputSrc=(HYPHEN|FILEPATH) OUTPUT_TO outputSink=(HYPHEN|FILEPATH)   optionals;
-yaml_command_batch:	    optionals   YAML optionals YAML_BATCH	optionals   batchFilePath=FILEPATH		    optionals INPUT_FROM inputSrc=(HYPHEN|FILEPATH) OUTPUT_TO outputSink=(HYPHEN|FILEPATH)   optionals;
+yaml_command_table: 	optionals   YAML optionals YAML_TABLE   optionals   regularexpression columnslist   optionals INPUT_FROM inputSrc=(HYPHEN|FILEPATH) OUTPUT_TO outputSink=(HYPHEN|FILEPATH)   optionals;
+yaml_command_macro:	    optionals   YAML optionals YAML_MACRO   optionals   macroProperties         		optionals INPUT_FROM inputSrc=(HYPHEN|FILEPATH) OUTPUT_TO outputSink=(HYPHEN|FILEPATH)   optionals;
+yaml_command_batch:	    optionals   YAML optionals YAML_BATCH	optionals   batchFilePath=FILEPATH_ATPREFIX optionals INPUT_FROM inputSrc=(HYPHEN|FILEPATH) OUTPUT_TO outputSink=(HYPHEN|FILEPATH)   optionals;
 
 // ==================================
 
 optionals  : ( ( DELIMITER_OPT  delimiter+=delimiter_text ) | ( YAMLLIBRARY_OPT  yamlImplementation+=YAMLLIBRARY_LIST ) | VERBOSE | SHOWSTATS | yamlQuoteChar=QUOTEYAMLCONTENT )* ;
 
-newcontent : (  FILEPATH | inlinejson  ) ;
-
-columns    : SIMPLEWORD ( COMMA SIMPLEWORD )* ;
-
 // ==================================
 
-inlinejson     :  JSONBEGIN  inlinejsonelem  ( COMMA inlinejsonelem ) *   JSONBEGIN ;
-inlinejsonelem :	( SIMPLEWORD | any_quoted_text )	COLON	( SIMPLEWORD | any_quoted_text | inlinejson ) ;
+delimiter_text : delimiter_char | SINGLEQUOTEDTEXT | DOUBLEQUOTEDTEXT ;
+delimiter_char : COMMA | AT | SLASH | PERCENT | UNDERSCORE | PERIOD ;
+// !!!!!! Warning.  Do NOT add 'SEMICOLON' to the list of delimiters.
+// !!!!!! Warning.  Do NOT add 'COLON' to the list of delimiters.. .. until you can figure out how JSON and this can CO-EXIST
 
-// ==================================
 
-delimiter_text : DELIMITER_CHAR | SINGLEQUOTEDTEXT | DOUBLEQUOTEDTEXT | SINGLEDOUBLEQUOTEDTEXT | DOUBLESINGLEQUOTEDTEXT ;
 any_quoted_text : SINGLEQUOTEDTEXT | DOUBLEQUOTEDTEXT | SINGLEDOUBLEQUOTEDTEXT | DOUBLESINGLEQUOTEDTEXT ;
 
 //=================================================================================
@@ -97,8 +93,35 @@ any_quoted_text : SINGLEQUOTEDTEXT | DOUBLEQUOTEDTEXT | SINGLEDOUBLEQUOTEDTEXT |
 // WARNING: Do NOT move 'regularexpression' or 'projectionpath' to 'PARSER' section
 // NOTE: an XML-path or a YAML-Path can look like a file-path with a leading '/'
 
-regularexpression: FILEPATH | any_quoted_text | NONQUOTEDTEXT;
+regularexpression: FILEPATH | any_quoted_text | ( COMMA | ANYWORD | INDEX_EXPR | NONQUOTEDTEXT )+        // see notes below !!!!!!!!!!!!!!!!!!
+    {   if ( $ctx.getText().startsWith("--") ) {
+            // !!!!!!!!!!!!!!!!!!!!!!!!!! Yeah !!!!!!!!!!!!!!!!!! This code works.  Try providing '--XYZ' instead of a RegExp!
+            System.err.println( $ctx.getText() +" command-line option is unknown" );
+            final RecognitionException re = new RecognitionException( this, this.getInputStream(), $ctx );
+            notifyErrorListeners( getCurrentToken(), "This command-line option is unknown", re );
+        }
+    };
+    // we need both 'BRACKETS' and "NUMBERS" in the definition as "[1]" will be parsed as 3 separate tokens as: BRACKETS NUMBER BRACKETS
+
+//=================================================================================
+//@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+//=================================================================================
+
+newcontent : (  FILEPATH_ATPREFIX | any_quoted_text | inlinejson  ) ;
+
+macroProperties : INLINEPROPERTIES | FILEPATH_ATPREFIX ;
+
+//columns    : SIMPLE WORD ( COM MA SIMPLE WORD )* ;
+
+columnslist : SINGLEQUOTEDTEXT | DOUBLEQUOTEDTEXT | ANYWORD ;
+            // Attention: Ensure the list of EXPLICIT single-chars above, matches the list for Parser's delimiter_char
+
 
 projectionpath: any_quoted_text | ANYWORD;
+
+// ==================================
+
+inlinejson     :  JSONBEGIN  inlinejsonelem  ( COMMA inlinejsonelem ) *   JSONEND ;
+inlinejsonelem :	( SIMPLEWORD | any_quoted_text )	COLON	( SIMPLEWORD | any_quoted_text | inlinejson ) ;
 
 //EOF
