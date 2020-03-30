@@ -46,9 +46,8 @@ import org.antlr.v4.runtime.tree.*; // https://www.antlr.org/api/Java/org/antlr/
 public class YAMLANTLR4ParserUtils {
 
     private static final String HDR0 = YAMLANTLR4ParserUtils.class.getName();
-    public static final String CLASSNAME = HDR0;
 
-    public boolean verbose = true;
+    public boolean verbose;
 
     //==============================================================================
     //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
@@ -56,52 +55,6 @@ public class YAMLANTLR4ParserUtils {
 
     public YAMLANTLR4ParserUtils( final boolean _verbose ) {
         this.verbose = _verbose;
-    }
-
-    //==============================================================================
-    //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-    //==============================================================================
-
-    //==============================================================================
-    //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-    //==============================================================================
-
-    // * @param _lexerToken NotNull reference to the LEXER TOKEN (so that the method can return the text of that token)
-    /**
-     * A RegExp for YAML-Commands is defined in the parser as: (FILEPATH | any_quoted_text | NONQUOTEDTEXT).  We do Not know (nor do we care to know) which one of the 3 was parsed.<br>
-     * This method will transparently check each of the 3 possibilities .. and retun the String that got identified as 'regularexpression' Parser-Token.
-     * @param _regExpCtx NotNull reference obtained by invoking 'singleYAMLCmdCtx.regularexpression()'
-     * @return NotNull or throws exception
-     * @throws RuntimeException if something wierd happens that code-writer did not anticipate (bug-alert)
-     */
-    public String getRegExpAsString( final YAMLANTLR4Parser.RegularexpressionContext _regExpCtx) throws RuntimeException {
-        final String HDR = HDR0 + ".getRegExpAsString(): ";
-        //  Possibility #1: FILEPATH (LEXER Token)
-        final org.antlr.v4.runtime.tree.TerminalNode fp = _regExpCtx.FILEPATH(); // https://www.antlr.org/api/Java/org/antlr/v4/runtime/tree/TerminalNode.html
-        if ( fp != null ) return fp.getText();
-        // see how to call getText() correctly @ https://github.com/antlr/antlr4/blob/master/doc/faq/parse-trees.md#how-do-i-get-the-input-text-for-a-parse-tree-subtree
-
-        //  Possibility #2: any_quoted_text (Parser Token)
-        final YAMLANTLR4Parser.Any_quoted_textContext aqtCtx = _regExpCtx.any_quoted_text();
-        if ( aqtCtx != null ) {
-            final org.antlr.v4.runtime.tree.TerminalNode sqt = aqtCtx.SINGLEQUOTEDTEXT();  // https://www.antlr.org/api/Java/org/antlr/v4/runtime/tree/TerminalNode.html
-            if ( sqt != null ) return sqt.getText();
-            final TerminalNode dqt = aqtCtx.DOUBLEQUOTEDTEXT();
-            if ( dqt != null ) return dqt.getText();
-            final TerminalNode sdqt = aqtCtx.SINGLEDOUBLEQUOTEDTEXT();
-            if ( sdqt != null ) return sdqt.getText();
-            final TerminalNode dsqt = aqtCtx.DOUBLESINGLEQUOTEDTEXT();
-            if ( dsqt != null ) return dsqt.getText();
-            // see how to call getText() correctly @ https://github.com/antlr/antlr4/blob/master/doc/faq/parse-trees.md#how-do-i-get-the-input-text-for-a-parse-tree-subtree
-        }
-
-        //  Possibility #3: NONQUOTEDTEXT (LEXER Token)
-        final org.antlr.v4.runtime.tree.TerminalNode nqt = _regExpCtx.NONQUOTEDTEXT(); // https://www.antlr.org/api/Java/org/antlr/v4/runtime/tree/TerminalNode.html
-        if ( nqt != null ) return nqt.getText();
-        // see how to call getText() correctly @ https://github.com/antlr/antlr4/blob/master/doc/faq/parse-trees.md#how-do-i-get-the-input-text-for-a-parse-tree-subtree
-
-        // UNEXPECTED.  Bug Report please!
-        throw new RuntimeException( "Bug Report. Clearly the .g4 PARSER-language definition has been updated, and this method is NOT in sync! "+ _regExpCtx );
     }
 
     //==============================================================================
@@ -120,8 +73,9 @@ public class YAMLANTLR4ParserUtils {
      * @throws RuntimeException typically this should lead to a bug-report
      */
     public ArrayList<String> toStrings( final ParserRuleContext _prc ) throws RuntimeException {
-        final String HDR = HDR0 + ".toStrings(): ";
+        // final String HDR = HDR0 + ".toStrings(): ";
         final ArrayList<String> s = new ArrayList<>();
+        if ( _prc == null ) return s;
         for ( int ix =0;  ix < _prc.getChildCount(); ix ++ ) {
             final ParseTree ptObj = _prc.getChild( ix );    // https://www.antlr.org/api/Java/org/antlr/v4/runtime/tree/ParseTree.html
             s.add( ptObj.getText() );
@@ -144,6 +98,7 @@ public class YAMLANTLR4ParserUtils {
      */
     public <T extends ParserRuleContext> ArrayList<String> toStrings( final java.util.List<T> _prc ) throws RuntimeException {
         final ArrayList<String> s = new ArrayList<>();
+        if ( _prc == null ) return s;
         for ( T ix: _prc ) {
             s.addAll( this.toStrings( ix ) );
         }
