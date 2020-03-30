@@ -33,6 +33,7 @@
 package org.ASUX.language;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assume.assumeFalse;
@@ -138,46 +139,78 @@ public class TestYAMLANTLR4 {
         assumeTrue( TestYAMLANTLR4.bNoTestFailedSoFar );
 
         try {
-            // final String yamlCmdStr = "yaml read '/reg/\"exp\"/g' < @/file/name > path.to/file";
+            // final String yamlCmdStr = "yaml read '/reg/\"exp\"/g' < /file/name > path.to/file";
             // CharStream inputStream = CharStreams.fromString( yamlCmdStr );   // https://www.antlr.org/api/Java/org/antlr/v4/runtime/CharStreams.html
             // DEPRECATED: ANTLRInputStream inputStream = new ANTLRInputStream( yamlCmdStr ); 
             final CharStream inputStream = CharStreams.fromFileName( TEST_INPUT_YAML_COMMANDS ); // https://www.antlr.org/api/Java/org/antlr/v4/runtime/CharStreams.html
-// yaml read '/reg/"exp"/g' --verbose --delimiter "/" --showStats -v < @/file/name > path.to/file ; 
-// yaml list '/2reg/expresssion' --delimiter "JUNKSTR" -d "/" --yamllibrary SnakeYAML --single-quote -i @/file/name --output 
-
-            final YAMLANTLR4Lexer mylexer = new YAMLANTLR4Lexer( inputStream );
-            final CommonTokenStream commonTokenStream = new CommonTokenStream( mylexer );
-
-            // Start parsing
-            if ( this.verbose ) System.out.println( HDR + "about to parse" );
-            final YAMLANTLR4Parser parser = new YAMLANTLR4Parser( commonTokenStream );
-            final YAMLANTLR4ParserUtils util = new YAMLANTLR4ParserUtils( this.verbose );
+// yaml read '/reg/"exp"/g' --verbose --delimiter "/" --showStats -v < /file/name > path.to/file ;
+// yaml list '/2reg/expresssion' --delimiter "JUNKSTR" -d "/" --yamllibrary SnakeYAML --single-quote -i /file/name --output
 
             //==============================================================================
-            YAMLANTLR4Parser.Yaml_commandsContext topmostCtx = parser.yaml_commands();  // if the grammer/scenario restricted user-input to JUST 1 command ONLY.
+            // final YAMLANTLR4Lexer defaultLexer = new YAMLANTLR4Lexer( inputStream );
+            // Do NOT use the DefaultLexer anymore..
+            final MyYAMLANTLR4Lexer myLexer = new MyYAMLANTLR4Lexer( this.verbose,  inputStream );
+            final CommonTokenStream commonTokenStream = new CommonTokenStream( myLexer );
+
+            // Looking to print/dump the Stream of tokens already parsed successfully?
+            // Its automatically done by MyYAMLANTLR4Lexer.java's emit(Token t) method.  Just set verbose == true.
+
+            // Configure parser and appropriate Listeners and ErrorListeners
+            if ( this.verbose ) System.out.println( HDR + "init parser" );
+            final YAMLANTLR4Parser defaultParser = new YAMLANTLR4Parser( commonTokenStream );
+
+            //==============================================================================
+            // Error Listeners - one each for Lexer and Parser
+            // Write your lexer such that a syntax error is impossible!!
+            // In ANTLR 4, it is easy to do this by simply adding the following as the last rule of your lexer:
+            //      ErrorChar : . ;
+            // By doing this, __ALL__ errors are moved from the lexer to the parser.
+            // I've NOT implemented this approach.
+            // See HOWTO Details @ https://stackoverflow.com/questions/18782388/antlr4-lexer-error-reporting-length-of-offending-characters
+
+            // 1st for Lexical Error handling
+            defaultParser.setErrorHandler( new BailErrorStrategy() );
+            // With BailErrorStrategy, at the first ___Lexical___ Error, both parser & lexer stop.
+            // Example Output seen on error:
+            //      line 1:10 no viable alternative at input '--sfakdhasdf'
+            //      org.antlr.v4.runtime.misc.ParseCancellationException
+
+            // 2nd for Parser-Errors
+            // defaultParser.removeErrorListeners(); // to remove the default listeners for Parser Errors
+            final MyErrorListener errorListener = new MyErrorListener( this.verbose, defaultParser.getParseListeners() ); // This is __MY OWN__  Java-class to listen to errors.
+// !!!!!!!!!!! Attention !!!!!!!!!! Somehow.. the line-below 'defaultParser.addErrorListener(..)' causes even basic Lexer errors.
+            // defaultParser.addErrorListener( errorListener ); // pass in any sub-class of BaseErrorListener
+// !!!!!!!!!!! Attention !!!!!!!!!! Somehow.. the above 'defaultParser.addErrorListener(..)' causes even basic Lexer errors.
+            //     // void	syntaxError(Recognizer<?,?> recognizer, Object offendingSymbol, int line, int charPositionInLine, String msg, RecognitionException e)
+            //     // Upon syntax error, notify any interested parties.
+
+            //==============================================================================
+            // Start parsing
+            if ( this.verbose ) System.out.println( HDR + "about to parse" );
+            YAMLANTLR4Parser.Yaml_commandsContext topmostCtx = defaultParser.yaml_commands();  // if the grammer/scenario restricted user-input to JUST 1 command ONLY.
             final java.util.List<YAMLANTLR4Parser.Yaml_commandContext> cmdsCtx = topmostCtx.yaml_command();
+
+            if ( this.verbose ) System.out.println( "\n" ); // because My-OWN-Lexer will be dumping tokens separated by Tabs
+
+            //==============================================================================
+            final YAMLANTLR4ParserUtils util = new YAMLANTLR4ParserUtils( this.verbose );
 
             //==============================================================================
             // !!! ALERT !!! EITHER - OR !!!
             // EITHER use Listener/Visitor classses - OR - use FOR-Loop below.
             // If you invoke 'addParseListener()' or 'visit()' .. the FOR Loop will _ONLY_ see the last line-of-input
-            // NOTE: The "typical" listener should be defined _BEFORE_ invoking 'parser.yaml_command()'
+            // !!!!!!!!!!!!!!!!!!! ALERT !!!!!!!!!!!!!!!!!!!!!
+
+            // NOTE: The "typical" listener should be defined _BEFORE_ invoking 'defaultParser.yaml_command()'
             // final MyYAMLParserListener myListener = new MyYAMLParserListener( this.verbose );
-            // parser.addParseListener( myListener ); // This Listener is automatically generated by ANTLR4
+            // defaultParser.addParseListener( myListener ); // This Listener is automatically generated by ANTLR4
 
             //-----------------------------
-            // // Both Visitor & Listener will be invoked _WHILE_ the "Tree" is build by the 'parser.yaml_command()'
+            // // Both Visitor & Listener will be invoked _WHILE_ the "Tree" is build by the 'defaultParser.yaml_command()'
             // if ( this.verbose ) System.out.println( HDR + "about to engage VISITOR class to walk thru the parsed 'parser-TREE'" );
             // // VISITOR PATTERN.  Will trigger invocation of YAMLANTLR4ParserVisitor.visitContent()
-            // MyYAMLParserVisitor visitor =  new MyYAMLParserVisitor( this.verbose ); // Default: YAMLANTLR4ParserBaseVisitor<String> visitor =  new YAMLANTLR4ParserBaseVisitor<String>();
-            // visitor.visit( topmostCtx );
-
-            //-----------------------------
-            // Error Listener
-            final MyErrorListener errorListener = new MyErrorListener( this.verbose, null );
-            parser.addErrorListener( errorListener );  // This is __MY OWN__  Java-class to listen to errors.
-                // void	syntaxError(Recognizer<?,?> recognizer, Object offendingSymbol, int line, int charPositionInLine, String msg, RecognitionException e)
-                // Upon syntax error, notify any interested parties.
+            // MyYAMLParserVisitor myVisitor =  new MyYAMLParserVisitor( this.verbose ); // Default: YAMLANTLR4ParserBaseVisitor<String> defaultVisitor =  new YAMLANTLR4ParserBaseVisitor<String>();
+            // myVisitor.visit( topmostCtx );
 
             //==============================================================================
             //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
@@ -225,7 +258,7 @@ public class TestYAMLANTLR4 {
                         assertEquals(YAMLANTLR4Lexer.ANYWORD,           commonTokenStream.get(tokenNum++).getType());
                         assertEquals(YAMLANTLR4Lexer.VERBOSE,           commonTokenStream.get(tokenNum++).getType());
                         assertEquals(YAMLANTLR4Lexer.DELIMITER_OPT,     commonTokenStream.get(tokenNum++).getType());
-                        assertEquals(YAMLANTLR4Lexer.DELIMITER_CHAR,    commonTokenStream.get(tokenNum++).getType());
+                        assertEquals(YAMLANTLR4Lexer.COMMA,             commonTokenStream.get(tokenNum++).getType());
                         assertEquals(YAMLANTLR4Lexer.SHOWSTATS,         commonTokenStream.get(tokenNum++).getType());
                         assertEquals(YAMLANTLR4Lexer.VERBOSE,           commonTokenStream.get(tokenNum++).getType());
                         assertEquals(YAMLANTLR4Lexer.INPUT_FROM,        commonTokenStream.get(tokenNum++).getType());
@@ -287,8 +320,8 @@ public class TestYAMLANTLR4 {
 // // My Educated Guess.  2nd parameter (Rule Definition) is MUCH MORE than what is in argument 1.  Basically, argument 1 must be a _FULL_ match of the Rule.
 // // The "tags" INSIDE the angle-brackets represent either token or rule references in the associated grammar.
 //                     // The preferred method of getting a tree pattern.
-//                     // SIGNATURE: ParseTreePattern <variab> = parser.compileParseTreePattern( String pattern, int patternRuleIndex );
-//                     final ParseTreePattern ptPatt11 = parser.compileParseTreePattern( "<DELIMITER_OPT> <any_quoted_text>", YAMLANTLR4Parser.RULE_optionals );
+//                     // SIGNATURE: ParseTreePattern <variab> = defaultParser.compileParseTreePattern( String pattern, int patternRuleIndex );
+//                     final ParseTreePattern ptPatt11 = defaultParser.compileParseTreePattern( "<DELIMITER_OPT> <any_quoted_text>", YAMLANTLR4Parser.RULE_optionals );
 //                     // !!! ATTENTION !!! above '<DELIMITER_OPT>' is the actual value of the 1st argument !!!!!!!
 //                     final ParseTreeMatch matcher11  = ptPatt11.match( topmostCtx );
 //                     final ParseTreeMatch matcher11b = ptPatt11.match( optionalsCtx );
@@ -304,7 +337,7 @@ public class TestYAMLANTLR4 {
 // // DID NOT WORK.  I'm not sure about the format of 1st argument and NOT sure of what to put into 2nd argument.
 // // My Educated Guess.  2nd parameter (Rule Definition) is MUCH MORE than what is in argument 1.  Basically, argument 1 must be a _FULL_ match of the Rule.
 // // The "tags" INSIDE the angle-brackets represent either token or rule references in the associated grammar.
-//                     final ParseTreePattern ptPatt22 = parser.compileParseTreePattern( "<VERBOSE>", YAMLANTLR4Parser.RULE_optionals );
+//                     final ParseTreePattern ptPatt22 = defaultParser.compileParseTreePattern( "<VERBOSE>", YAMLANTLR4Parser.RULE_optionals );
 //                     // !!! ATTENTION !!! above '<VERBOSE>' is the actual value of the 1st argument !!!!!!!
 //                     final ParseTreeMatch matcher22  = ptPatt22.match( topmostCtx );   // <<-- RETURN is a SCALAR-value (Unlike 'findAll()' )
 // // aaaarrrrrggggghhhhh!!! matcher22 fails!
@@ -317,14 +350,14 @@ public class TestYAMLANTLR4 {
 // // DID NOT WORK.  I'm not sure about the format of 1st argument and NOT sure of what to put into 2nd argument.
 // // My Educated Guess.  2nd parameter (Rule Definition) is MUCH MORE than what is in argument 1.  Basically, argument 1 must be a _FULL_ match of the Rule.
 // // The "tags" INSIDE the angle-brackets represent either token or rule references in the associated grammar.
-//                     // final ParseTreePattern ptPatt99 = parser.compileParseTreePattern( "<DELIMITER_OPT> <any_quoted_text>", YAMLANTLR4Parser.RULE_yaml_commands);
+//                     // final ParseTreePattern ptPatt99 = defaultParser.compileParseTreePattern( "<DELIMITER_OPT> <any_quoted_text>", YAMLANTLR4Parser.RULE_yaml_commands);
 //                     // final java.util.List<ParseTreeMatch> matches99 = ptPatt99.findAll( topmostCtx, "//yaml_command/*/optionals" ); // <<-- !!!! RETURN is a List<>
 //                     // if ( this.verbose ) matches99.forEach( ptree -> System.out.println( HDR + "#1(matcher) //yaml_command/*/optionals >> "+ ptree ) );
 
                     //=================================================================
 // !!!!!!!!!!!!! ATTENTION !!!!!!!!!!!!!!!!!!!!!
 // The XPath will MATCH __ALL__ the YAML commands in the file!!!!!
-                    final java.util.Collection<ParseTree> xpathQRes = org.antlr.v4.runtime.tree.xpath.XPath.findAll( topmostCtx, "//yaml_command/*/optionals", parser );
+                    final java.util.Collection<ParseTree> xpathQRes = org.antlr.v4.runtime.tree.xpath.XPath.findAll( topmostCtx, "//yaml_command/*/optionals", defaultParser );
                     if ( this.verbose ) xpathQRes.forEach( ptree -> System.out.println( HDR + "#2(XPath.findAll) //yaml_command/*/optionals >> "+ ptree.getText() ) );
                     // XPATH-EXAMPLE = //'return'   :means: any 'return' literal in tree
                     // XPATH-EXAMPLE = /prog/func/!'myvalue'     :means: any literal other than 'myvalue'.. under func, which is under prog.
@@ -418,7 +451,7 @@ public class TestYAMLANTLR4 {
                     final String inputSrc   = readCtx.inputSrc.getText();   // commonTokenStream.get( regExpPos + ?? ).getText();
                     final String outputSink = readCtx.outputSink.getText(); // commonTokenStream.get( regExpPos + ?? ).getText();
                     if ( this.verbose ) System.out.println( HDR + "Read-YAML's InputSOURCE =["+ inputSrc +"] OutputSink=["+ outputSink +"]" );
-                    if ( lineNum == 1 ) assertTrue( "@/file/name".equals(inputSrc) );
+                    if ( lineNum == 1 ) assertTrue( "/file/name".equals(inputSrc) );
                     if ( lineNum == 1 ) assertTrue( "path.to/file".equals(outputSink) );
                     if ( lineNum == 2 ) assertTrue( "inputs/nano.yaml".equals(inputSrc) );
                     if ( lineNum == 2 ) assertTrue( "-".equals(outputSink) );
@@ -435,7 +468,13 @@ public class TestYAMLANTLR4 {
                     assertEquals(YAMLANTLR4Lexer.YAML,              commonTokenStream.get(tokenNum++).getType());
                     assertEquals(YAMLANTLR4Lexer.YAML_LIST,         commonTokenStream.get(tokenNum++).getType());
                     final int regExpPos = tokenNum;
-                    assertEquals(YAMLANTLR4Lexer.SINGLEQUOTEDTEXT,  commonTokenStream.get(tokenNum++).getType()); // Note the difference in TOKEN-name here vs. the one 9 lines above.
+                    assertEquals(YAMLANTLR4Lexer.NONQUOTEDTEXT,     commonTokenStream.get(tokenNum++).getType()); // Note the difference in TOKEN-name here vs. the one 9 lines above.
+                    assertEquals(YAMLANTLR4Lexer.ANYWORD,           commonTokenStream.get(tokenNum++).getType()); // 2nd fragment of the REGULAR-EXPRESSION
+                    assertEquals(YAMLANTLR4Lexer.NONQUOTEDTEXT,     commonTokenStream.get(tokenNum++).getType()); // 2nd fragment of the REGULAR-EXPRESSION
+                    assertEquals(YAMLANTLR4Lexer.NONQUOTEDTEXT,     commonTokenStream.get(tokenNum++).getType()); // 2nd fragment of the REGULAR-EXPRESSION
+                    assertEquals(YAMLANTLR4Lexer.ANYWORD,           commonTokenStream.get(tokenNum++).getType()); // 2nd fragment of the REGULAR-EXPRESSION
+                    assertEquals(YAMLANTLR4Lexer.INDEX_EXPR,        commonTokenStream.get(tokenNum++).getType()); // 2nd fragment of the REGULAR-EXPRESSION
+                    assertEquals(YAMLANTLR4Lexer.ANYWORD,           commonTokenStream.get(tokenNum++).getType()); // 2nd fragment of the REGULAR-EXPRESSION
                     assertEquals(YAMLANTLR4Lexer.DELIMITER_OPT,     commonTokenStream.get(tokenNum++).getType());
                     assertEquals(YAMLANTLR4Lexer.DOUBLEQUOTEDTEXT,  commonTokenStream.get(tokenNum++).getType());
                     assertEquals(YAMLANTLR4Lexer.DELIMITER_OPT,     commonTokenStream.get(tokenNum++).getType());
@@ -447,17 +486,23 @@ public class TestYAMLANTLR4 {
                     assertEquals(YAMLANTLR4Lexer.FILEPATH,          commonTokenStream.get(tokenNum++).getType());
                     assertEquals(YAMLANTLR4Lexer.OUTPUT_TO,         commonTokenStream.get(tokenNum++).getType());
                     assertEquals(YAMLANTLR4Lexer.FILEPATH,          commonTokenStream.get(tokenNum++).getType());
-                    assertEquals(YAMLANTLR4Lexer.SEMICOLON,         commonTokenStream.get(tokenNum++).getType());
+                    // assertEquals(YAMLANTLR4Lexer.SEMICOLON,         commonTokenStream.get(tokenNum++).getType());
                     // assertTrue( YAMLANTLR4Lexer.NEWLINE    == commonTokenStream.get( tokenNum++ ).getType() ); // Grammer/Lexer rules updated to IGNORE all WhiteSpace, incl. NEWLINE
                     // if ( this.verbose ) System.out.println( HDR + "listCtx ="+ listCtx ); // USELESS DEBUG STATEMENT.  You'll see something like: [34 26]
                     final YAMLANTLR4Parser.RegularexpressionContext regExpCtx = listCtx.regularexpression();
-                    final String regExpStr = commonTokenStream.get( regExpPos ).getText();
+                    String regExpStr = ""; // concatenate the 6 pieces of the REGULAR-EXPRESSION into a single string
+                    for ( int ix = 0; ix < 7; ix ++ ) {
+                        regExpStr += commonTokenStream.get( regExpPos + ix ).getText();
+                    }
                     // see how to call getText() correctly @ https://github.com/antlr/antlr4/blob/master/doc/faq/parse-trees.md#how-do-i-get-the-input-text-for-a-parse-tree-subtree
                     if ( this.verbose ) System.out.println( HDR + "LIST-YAML's REGEXPstring(from Lexer) =["+ regExpStr +"] "+ regExpCtx );
-                    final String s = util.getRegExpAsString( regExpCtx );
+                    String s = ""; // util.getRegExpAsString( regExpCtx ); // I had to keep updating this 'regExpAsString' everytime I changed the Parser definition
+                    for( String is: util.toStrings( regExpCtx ) ) {
+                        s += is;
+                    }
                     // if ( this.verbose ) System.out.println( HDR + "LIST-YAML's REGEXPstring(from Parser) =["+ s +"] " );
-                    assertTrue( s.equals( regExpStr ) );
-                    assertTrue( s.equals( "'/2reg/expresssion'" ) );
+                    Assertions.assertEquals(s, regExpStr);
+                    Assertions.assertEquals("*,**,[1],schema", s);
 
                     final java.util.List<YAMLANTLR4Parser.OptionalsContext> optionalsCtxSet = listCtx.optionals();
                     final ArrayList<String> sss22 = util.toStrings( optionalsCtxSet );
@@ -548,7 +593,7 @@ public class TestYAMLANTLR4 {
                     final String inputSrc   = listCtx.inputSrc.getText();   // commonTokenStream.get( regExpPos + ?? ).getText();
                     final String outputSink = listCtx.outputSink.getText(); // commonTokenStream.get( regExpPos + ?? ).getText();
                     if ( this.verbose ) System.out.println( HDR + "LIST-YAML's InputSOURCE =["+ inputSrc +"] OutputSink=["+ outputSink +"]" );
-                    assertTrue( "@/file/name".equals(inputSrc) );
+                    assertTrue( "/file/name".equals(inputSrc) );
                     assertTrue( "path.to/file".equals(outputSink) );
 
                     continue; // !!!!!!!!!!!!!!!!! VERY IMPORTANT !!!!!!!!!!!!!!!!  .. .. as we are UNABLE to rely on a SWITCH-statement.
@@ -598,7 +643,7 @@ public class TestYAMLANTLR4 {
 
             } // for loop
 
-            // Uncomment the following assertEquals() ONLY AFTER uncommenting the line above for: 'parser.addParseListener( .. )'
+            // Uncomment the following assertEquals() ONLY AFTER uncommenting the line above for: 'defaultParser.addParseListener( .. )'
             assertTrue( "".equals(errorListener.getOffendingSymbol()) || "null".equals(errorListener.getOffendingSymbol()) || null == errorListener.getOffendingSymbol()  );
 
         } catch( AssertionError | Exception e ) { // AssertionError includes sub-class org.opentest4j.AssertionFailedError
@@ -632,29 +677,29 @@ public class TestYAMLANTLR4 {
             // System.out.println( HDR + "Awake" );
 
             final CharStream inputStream = CharStreams.fromFileName( TEST_INPUT_DEFECTIVE_YAML_COMMANDS ); // https://www.antlr.org/api/Java/org/antlr/v4/runtime/CharStreams.html
-// yaml read '/reg/"exp"/g' -verbose --SHOWStats -v --delimiter "JUNKSTR" -d "/" --yamllibrary SnakeYAML --single-quote -i @/file/name --output path.to/file ;
+// yaml read '/reg/"exp"/g' -verbose --SHOWStats -v --delimiter "JUNKSTR" -d "/" --yamllibrary SnakeYAML --single-quote -i /file/name --output path.to/file ;
 
-            final YAMLANTLR4Lexer mylexer = new YAMLANTLR4Lexer( inputStream );
-            final CommonTokenStream commonTokenStream = new CommonTokenStream( mylexer );
+            final YAMLANTLR4Lexer defaultLexer = new YAMLANTLR4Lexer( inputStream );
+            final CommonTokenStream commonTokenStream = new CommonTokenStream( defaultLexer );
 
             if ( this.verbose ) System.out.println( HDR + "about to parse" );
-            final YAMLANTLR4Parser parser = new YAMLANTLR4Parser( commonTokenStream );
+            final YAMLANTLR4Parser defaultParser = new YAMLANTLR4Parser( commonTokenStream );
             // final YAMLANTLR4ParserUtils util = new YAMLANTLR4ParserUtils( this.verbose );
 
             //==============================================================================
-            // NOTE: The "typical" listener should be defined _BEFORE_ invoking 'parser.yaml_command()'
+            // NOTE: The "typical" listener should be defined _BEFORE_ invoking 'defaultParser.yaml_command()'
             final MyYAMLParserListener myListener = new MyYAMLParserListener( this.verbose );
-            parser.addParseListener( myListener ); // This Listener is automatically generated by ANTLR4
+            defaultParser.addParseListener( myListener ); // This Listener is automatically generated by ANTLR4
             // Error Listener
-            final MyErrorListener errorListener = new MyErrorListener( this.verbose, myListener );
-            parser.addErrorListener( errorListener );  // This is __MY OWN__  Java-class to listen to errors.
+            final MyErrorListener errorListener = new MyErrorListener( this.verbose, defaultParser.getParseListeners() );
+            defaultParser.addErrorListener( errorListener );  // This is __MY OWN__  Java-class to listen to errors.
                 // void	syntaxError(Recognizer<?,?> recognizer, Object offendingSymbol, int line, int charPositionInLine, String msg, RecognitionException e)
                 // Upon syntax error, notify any interested parties.
 
             //==============================================================================
             // Start parsing
-            // YAMLANTLR4Parser.Yaml_commandContext context = parser.yaml_command();  // if the grammer/scenario restricted user-input to JUST 1 command ONLY.
-            final java.util.List<YAMLANTLR4Parser.Yaml_commandContext> cmdsCtx = parser.yaml_commands().yaml_command();
+            // YAMLANTLR4Parser.Yaml_commandContext context = defaultParser.yaml_command();  // if the grammer/scenario restricted user-input to JUST 1 command ONLY.
+            final java.util.List<YAMLANTLR4Parser.Yaml_commandContext> cmdsCtx = defaultParser.yaml_commands().yaml_command();
 
             //==============================================================================
             //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
@@ -692,7 +737,7 @@ public class TestYAMLANTLR4 {
 
             } // for loop
 
-            // Uncomment the following assertEquals() ONLY AFTER uncommenting the line above for: 'parser.addParseListener( .. )'
+            // Uncomment the following assertEquals() ONLY AFTER uncommenting the line above for: 'defaultParser.addParseListener( .. )'
             assertEquals( "-verbose", errorListener.getOffendingSymbol() );
 
         // } catch( java.lang.InterruptedException e ) {
