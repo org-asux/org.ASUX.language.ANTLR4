@@ -14,3 +14,5 @@ src/main/java/org/ASUX/language/antlr4/YAMLANTLR4ParserListener.java
 src/main/java/org/ASUX/language/antlr4/YAMLANTLR4Lexer.java
 src/main/java/org/ASUX/language/antlr4/YAMLANTLR4ParserBaseListener.java
 src/main/java/org/ASUX/language/antlr4/YAMLANTLR4ParserVisitor.java
+gen
+src/main/antlr4/org/ASUX/language/antlr4/*.tokens
