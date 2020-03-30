@@ -5,7 +5,7 @@ set ANTLRVERSION="4.7.2"
 set JAVAPKGNAME="org.ASUX.language"
 set JAVAPKG_ASPATH="org/ASUX/language/antlr4" ### Java packagename in the form of a FILE/FOLDER Path.
 set MAVEN_FLDRPATH="org/ASUX/language.antlr4" ### Java packagename in the form of a FILE/FOLDER Path.
-set JAVAPKG_SRCFLDR="./src/main/java/${JAVAPKG_ASPATH}"
+set JAVACLASSFLDR="./src/main/java/${JAVAPKG_ASPATH}"
 set GRAMMERNAMEPREFIX="YAMLANTLR4"
 
 ###----------------------------
