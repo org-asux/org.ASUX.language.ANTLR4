@@ -27,16 +27,24 @@ source $HOMEFLDR/bin/common.csh-source
 ###============================================
 
 echo '\
-( chdir ${JAVAPKG_SRCFLDR} ; \rm -rf *Parser*.java *Lexer.java *.interp )'
-#___ pushd ${JAVAPKG_SRCFLDR}
+( chdir ${JAVACLASSFLDR} ; \rm -rf *Parser*.java *Lexer.java *.interp )'
+#___ pushd ${JAVACLASSFLDR}
 #___ foreach PartialFileName (  Parser.interp ParserBaseVisitor.java Lexer.interp Parser.java ParserListener.java Lexer.java ParserBaseListener.java ParserVisitor.java )
 ### Decided that .. instead of HARD-coding the list of files (as in the 'foreach' line above) .. we'll leverage .gitignore which exists to ENSURE these above "auto-gen" files are NOT placed into SCCM.
 foreach FileName ( ${IGNORED_FILES} )
-	set FilePATH="${JAVAPKG_SRCFLDR}/${FileName}"
+	set FilePATH="${JAVACLASSFLDR}/${FileName}"
 	ls -lad ${FilePATH}
 	#___ echo -n ' continue ?>>'; set ANS="$<"
 	rm -f ${FilePATH}
 end
+
+set IDE_PLUGINFILE=./src/main/antlr4/${JAVAPKG_ASPATH}/YAMLANTLR4Lexer.tokens
+ls -la ${IDE_PLUGINFILE}
+rm -f ${IDE_PLUGINFILE}
+
+ls -lad gen
+rm -rf gen
+
 #___ popd 
 
 echo '\
