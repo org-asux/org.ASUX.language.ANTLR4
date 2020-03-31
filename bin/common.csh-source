@@ -1,6 +1,8 @@
 #!/bin/false
 
-set JARFOLDER="/Users/development/dist"
+if ( -e "/mnt/development" )    set JARFOLDER="/mnt/development/dist"
+if ( -e "/Users/development" )  set JARFOLDER="/Users/development/dist"
+
 set ANTLRVERSION="4.7.2"
 set JAVAPKGNAME="org.ASUX.language"
 set JAVAPKG_ASPATH="org/ASUX/language/antlr4" ### Java packagename in the form of a FILE/FOLDER Path.
