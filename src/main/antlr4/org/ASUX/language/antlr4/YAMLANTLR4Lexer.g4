@@ -136,7 +136,7 @@ fragment UNICODECHAR: [\p{L}] ;	// ATTENTION: This automatically includes UPPERC
 
 fragment CHAR_NONQUOTE_NONWS :	~['"\t\n\r] ; // Not a quote, Not a whitespace character.  Of course Blank can be WITHIN a quoted-string!
 
-fragment FILEPATHCHAR : ( UNICODECHAR | UNICODEDIGIT | UPPERCASE | LOWERCASE | AT | PERCENT | UNDERSCORE | [_.%()-] ) ;
+fragment FILEPATHCHAR : ( UNICODECHAR | UNICODEDIGIT | UPPERCASE | LOWERCASE | [_.%()-] ) ;
 
 // ==================================
 
@@ -161,6 +161,27 @@ BRACKETS : ( '[' | ']' | '(' | ')' );
 INDEX_EXPR: BRACKETS NUMBER ('-' NUMBER)? BRACKETS;
 
 // ==================================
+// Added SEMANTIC-PREDICATE, so that SIMPLEWORD matches __ONLY IF__ the preceding token is NOT a 'YAML_COMMAND'
+// Ideally, AVOID semantic-predicates.. unless they canNOT be avoided.
+//	  Instead, Choose to move the sematic-pred-LOGIC into the visitor-code and keep this grammer Language-INDEPendent!
+// NOTE: In java, '.getType()' is unnecessary for LA() invocation.
+//      https://www.antlr.org/api/Java/org/antlr/v4/runtime/UnbufferedCharStream.html
+// .LA() gives you just the token type, while .LT() gives you the entire token
+// Dont want a REGEXP-parser-token to match this Lexer defn.   Hence the Semantic Predicate condition.
+SIMPLEWORD : {lastTokenID !=  YAML_COMMAND}?
+	( UNICODECHAR | UNICODEDIGIT | UPPERCASE | LOWERCASE | DIGIT | [_.-] ) +  ;
+// Above will match AlphaNumerics and the EQUIVALENT for Non-English Character-sets (in addition to '_', '-' and periods)
+// Typically, this is reserved for Semantic-concepts like 'Variable-names', 'AWS-YAML Keys', ..
+
+INLINEPROPERTIES : // {lastTokenID ==  YAML_MACRO}?
+      ( SIMPLEWORD '=' SIMPLEWORD )
+    | ( SIMPLEWORD '=' SIMPLEWORD SEMICOLON INLINEPROPERTIES )
+    | SINGLEQUOTE INLINEPROPERTIES SINGLEQUOTE
+    | DOUBLEQUOTE INLINEPROPERTIES DOUBLEQUOTE
+    ;
+// Dont want a REGEXP-parser-token to match the above Lexer definition.   Hence the Semantic Predicate condition.
+
+// ==================================
 
 // !! ATTENTION !!   The '?' Meta-char after a '+' implies NON-Greedy matching.
 SINGLEQUOTEDTEXT : SINGLEQUOTE CHAR_NONQUOTE_NONWS+? SINGLEQUOTE ;
@@ -168,17 +189,15 @@ SINGLEQUOTEDTEXT : SINGLEQUOTE CHAR_NONQUOTE_NONWS+? SINGLEQUOTE ;
 DOUBLEQUOTEDTEXT : DOUBLEQUOTE CHAR_NONQUOTE_NONWS+? DOUBLEQUOTE ;
 // !! ATTENTION !!   The '?' Meta-char after a '+' implies NON-Greedy matching.
 
-SINGLEDOUBLEQUOTEDTEXT : SINGLEQUOTE NONQUOTEDTEXT ( DOUBLEQUOTEDTEXT | DOUBLESINGLEQUOTEDTEXT ) NONQUOTEDTEXT SINGLEQUOTE ;	// EXAMPLE:  'My name is "xyz", while my mom calls me "ABC".. '
-DOUBLESINGLEQUOTEDTEXT : DOUBLEQUOTE NONQUOTEDTEXT ( SINGLEQUOTEDTEXT | SINGLEDOUBLEQUOTEDTEXT ) NONQUOTEDTEXT DOUBLEQUOTE ;	// EXAMPLE:  "My name is 'XYZ', while my mom calls me 'abc'.. "
+SINGLEDOUBLEQUOTEDTEXT : SINGLEQUOTE ( NONQUOTEDTEXT | DOUBLEQUOTEDTEXT | DOUBLESINGLEQUOTEDTEXT )+ SINGLEQUOTE ;	// EXAMPLE:  'My name is "xyz", while my mom calls me "ABC".. '
+DOUBLESINGLEQUOTEDTEXT : DOUBLEQUOTE ( NONQUOTEDTEXT | SINGLEQUOTEDTEXT | SINGLEDOUBLEQUOTEDTEXT )+ DOUBLEQUOTE ;	// EXAMPLE:  "My name is 'XYZ', while my mom calls me 'abc'.. "
 
 // ==================================
 // !!!! WARNING !!!! 'FILEPATH' must follow 'SINGLEQUOTEDTEXT' & 'DOUBLEQUOTEDTEXT'
 // !!!! WARNING. 'FILEPATH' does NOT allow a SIMPLE-file-name (which will be considered 'ANYWORD' or 'SINGLEQUOTEDTEXT')
 
 FILEPATH : '/'? FILEPATHCHAR+ ( '/' FILEPATHCHAR+ )+ ;
-
-FILEPATH_ATPREFIX : '@' FILEPATH
-                |   '@' '/'? FILEPATHCHAR+ ;
+FILEPATH_ATPREFIX : '@' FILEPATH;
 
 // ==================================
 
@@ -189,31 +208,11 @@ ANYWORD :	( UNICODECHAR | UNICODEDIGIT | UPPERCASE | LOWERCASE | [_.,@%/:+-] ) +
 // ANYWORD :	( UNICODECHAR | UNICODEDIGIT | UPPERCASE | LOWERCASE | [_.,:;<>@%+{}\[\]-] ) +  ; 
 
 // ==================================
-// !!!! WARNING !!!! Lexer-definition for 'SIMPLEWORD' should follow 'ANYWORD', as 'SIMPLEWORD' matches almost everything.
-// So, added SEMANTIC-PREDICATE, so that SIMPLEWORD matches __ONLY IF__ the preceding token is NOT a 'YAML_COMMAND'
-// Ideally, AVOID semantic-predicates.. unless they canNOT be avoided.
-//	  Instead, Choose to move the sematic-pred-LOGIC into the visitor-code and keep this grammer Language-INDEPendent!
-// NOTE: In java, '.getType()' is unnecessary for LA() invocation.
-// https://www.antlr.org/api/Java/org/antlr/v4/runtime/UnbufferedCharStream.html
-// .LA() gives you just the token type, while .LT() gives you the entire token
-// Dont want a REGEXP-parser-token to match this Lexer defn.   Hence the Semantic Predicate condition.
-SIMPLEWORD : {_input.LA(-1) !=  YAML_COMMAND}?
-	( UNICODECHAR | UNICODEDIGIT | UPPERCASE | LOWERCASE | [_.-] ) +  ;
-// Above will match AlphaNumerics and the EQUIVALENT for Non-English Character-sets (in addition to '_', '-' and periods)
-// Typically, this is reserved for Semantic-concepts like 'Variable-names', 'AWS-YAML Keys', ..
-
-INLINEPROPERTIES : {_input.LA(-1) !=  YAML_MACRO}?
-      ( SIMPLEWORD '=' SIMPLEWORD )
-    | ( SIMPLEWORD  '=' SIMPLEWORD ';' INLINEPROPERTIES )
-    ;
-// Dont want a REGEXP-parser-token to match the above Lexer definition.   Hence the Semantic Predicate condition.
-
-// ==================================
 // ATTENTION : 'NONQUOTEDTEXT' is among the MOST generic/loose token-definitions.  So, must be last.
 // It will allow __ANY__ NON-Alphanumeric string (bounded by white-space)
 
 // !! ATTENTION !!   The '?' Meta-char after a '+' implies NON-Greedy matching.
-NONQUOTEDTEXT    : CHAR_NONQUOTE_NONWS+?  ;  // will NOT allow a quote anywhere within this 'NONQUOTEDTEXT'
+NONQUOTEDTEXT    :  CHAR_NONQUOTE_NONWS+? ;  // will NOT allow a quote anywhere within this 'NONQUOTEDTEXT'
 // !! ATTENTION !!   The '?' Meta-char after a '+' implies NON-Greedy matching.
 
 // ==================================

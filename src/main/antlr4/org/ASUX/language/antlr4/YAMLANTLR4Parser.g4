@@ -70,7 +70,7 @@ yaml_command_replace:	optionals   YAML optionals YAML_REPLACE optionals   regula
 yaml_command_insert:	optionals   YAML optionals YAML_INSERT  optionals   regularexpression newcontent	optionals INPUT_FROM inputSrc=(HYPHEN|FILEPATH) OUTPUT_TO outputSink=(HYPHEN|FILEPATH)   optionals;
 yaml_command_table: 	optionals   YAML optionals YAML_TABLE   optionals   regularexpression columnslist   optionals INPUT_FROM inputSrc=(HYPHEN|FILEPATH) OUTPUT_TO outputSink=(HYPHEN|FILEPATH)   optionals;
 yaml_command_macro:	    optionals   YAML optionals YAML_MACRO   optionals   macroProperties         		optionals INPUT_FROM inputSrc=(HYPHEN|FILEPATH) OUTPUT_TO outputSink=(HYPHEN|FILEPATH)   optionals;
-yaml_command_batch:	    optionals   YAML optionals YAML_BATCH	optionals   batchFilePath=FILEPATH_ATPREFIX optionals INPUT_FROM inputSrc=(HYPHEN|FILEPATH) OUTPUT_TO outputSink=(HYPHEN|FILEPATH)   optionals;
+yaml_command_batch:	    optionals   YAML optionals YAML_BATCH	optionals   batchFilePath                   optionals INPUT_FROM inputSrc=(HYPHEN|FILEPATH) OUTPUT_TO outputSink=(HYPHEN|FILEPATH)   optionals;
 
 // ==================================
 
@@ -91,9 +91,9 @@ any_quoted_text : SINGLEQUOTEDTEXT | DOUBLEQUOTEDTEXT | SINGLEDOUBLEQUOTEDTEXT |
 //=================================================================================
 
 // WARNING: Do NOT move 'regularexpression' or 'projectionpath' to 'PARSER' section
-// NOTE: an XML-path or a YAML-Path can look like a file-path with a leading '/'
+// ATTENTION: an XML-path or a YAML-Path can look like a file-path with a leading '/' .. .. hence the use of FILEPATH
 
-regularexpression: FILEPATH | any_quoted_text | ( COMMA | ANYWORD | INDEX_EXPR | NONQUOTEDTEXT )+        // see notes below !!!!!!!!!!!!!!!!!!
+regularexpression: FILEPATH | any_quoted_text | SIMPLEWORD | ( COMMA | ANYWORD | INDEX_EXPR | NONQUOTEDTEXT )+        // see notes below !!!!!!!!!!!!!!!!!!
     {   if ( $ctx.getText().startsWith("--") ) {
             // !!!!!!!!!!!!!!!!!!!!!!!!!! Yeah !!!!!!!!!!!!!!!!!! This code works.  Try providing '--XYZ' instead of a RegExp!
             System.err.println( $ctx.getText() +" command-line option is unknown" );
@@ -103,21 +103,21 @@ regularexpression: FILEPATH | any_quoted_text | ( COMMA | ANYWORD | INDEX_EXPR |
     };
     // we need both 'BRACKETS' and "NUMBERS" in the definition as "[1]" will be parsed as 3 separate tokens as: BRACKETS NUMBER BRACKETS
 
+batchFilePath : FILEPATH_ATPREFIX | FILEPATH;
+
 //=================================================================================
 //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 //=================================================================================
 
-newcontent : (  FILEPATH_ATPREFIX | any_quoted_text | inlinejson  ) ;
+newcontent : (  FILEPATH_ATPREFIX | any_quoted_text   ) ; // inlinejson
 
-macroProperties : INLINEPROPERTIES | FILEPATH_ATPREFIX ;
-
-//columns    : SIMPLE WORD ( COM MA SIMPLE WORD )* ;
+macroProperties : INLINEPROPERTIES | AT FILEPATH ;
 
 columnslist : SINGLEQUOTEDTEXT | DOUBLEQUOTEDTEXT | ANYWORD ;
             // Attention: Ensure the list of EXPLICIT single-chars above, matches the list for Parser's delimiter_char
 
 
-projectionpath: any_quoted_text | ANYWORD;
+projectionpath: any_quoted_text | SIMPLEWORD | ANYWORD;
 
 // ==================================
 
