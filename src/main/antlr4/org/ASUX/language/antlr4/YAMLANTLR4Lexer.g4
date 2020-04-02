@@ -134,6 +134,8 @@ fragment LOWERCASE: [a-z];
 fragment UNICODEDIGIT : [\p{N}] ; // ATTENTION: This automatically includes 'DIGIT'
 fragment UNICODECHAR: [\p{L}] ;	// ATTENTION: This automatically includes UPPERCASE and LOWERCASE
 
+fragment EXCLAMATION : '!';
+
 fragment CHAR_NONQUOTE_NONWS :	~['"\t\n\r] ; // Not a quote, Not a whitespace character.  Of course Blank can be WITHIN a quoted-string!
 
 fragment FILEPATHCHAR : ( UNICODECHAR | UNICODEDIGIT | UPPERCASE | LOWERCASE | [_.%()-] ) ;
@@ -168,8 +170,10 @@ INDEX_EXPR: BRACKETS NUMBER ('-' NUMBER)? BRACKETS;
 //      https://www.antlr.org/api/Java/org/antlr/v4/runtime/UnbufferedCharStream.html
 // .LA() gives you just the token type, while .LT() gives you the entire token
 // Dont want a REGEXP-parser-token to match this Lexer defn.   Hence the Semantic Predicate condition.
-SIMPLEWORD : {lastTokenID !=  YAML_COMMAND}?
-	( UNICODECHAR | UNICODEDIGIT | UPPERCASE | LOWERCASE | DIGIT | [_.-] ) +  ;
+
+
+
+SIMPLEWORD : 	( UNICODECHAR | UNICODEDIGIT | UPPERCASE | LOWERCASE | DIGIT | [_.-] ) +  ;
 // Above will match AlphaNumerics and the EQUIVALENT for Non-English Character-sets (in addition to '_', '-' and periods)
 // Typically, this is reserved for Semantic-concepts like 'Variable-names', 'AWS-YAML Keys', ..
 
@@ -180,6 +184,10 @@ INLINEPROPERTIES : // {lastTokenID ==  YAML_MACRO}?
     | DOUBLEQUOTE INLINEPROPERTIES DOUBLEQUOTE
     ;
 // Dont want a REGEXP-parser-token to match the above Lexer definition.   Hence the Semantic Predicate condition.
+
+
+IN_MEMORY_LABEL : EXCLAMATION SIMPLEWORD ;
+
 
 // ==================================
 
@@ -197,7 +205,7 @@ DOUBLESINGLEQUOTEDTEXT : DOUBLEQUOTE ( NONQUOTEDTEXT | SINGLEQUOTEDTEXT | SINGLE
 // !!!! WARNING. 'FILEPATH' does NOT allow a SIMPLE-file-name (which will be considered 'ANYWORD' or 'SINGLEQUOTEDTEXT')
 
 FILEPATH : '/'? FILEPATHCHAR+ ( '/' FILEPATHCHAR+ )+ ;
-FILEPATH_ATPREFIX : '@' FILEPATH;
+FILEPATH_ATPREFIX : '@' FILEPATH | '@' SIMPLEWORD ;
 
 // ==================================
 
