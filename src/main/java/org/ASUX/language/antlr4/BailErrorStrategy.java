@@ -43,7 +43,14 @@ import java.util.ArrayList;
  */
 public class BailErrorStrategy extends DefaultErrorStrategy {
     final String CLASSNAME = BailErrorStrategy.class.getName();
+    public boolean verbose;
 
+    //=====================================================================
+    public BailErrorStrategy( final boolean _verbose ) {
+        this.verbose = _verbose;
+    }
+
+    //=====================================================================
     /** Instead of recovering from exception {@code e}, re-throw it wrapped
      *  in a {@link ParseCancellationException} so it is not caught by the
      *  rule function catches.  Use {@link Exception#getCause()} to get the
@@ -55,11 +62,13 @@ public class BailErrorStrategy extends DefaultErrorStrategy {
         final YAMLANTLR4ParserUtils util = new YAMLANTLR4ParserUtils( false );
 
         //----------------------
-        System.err.println(HDR + "recognizer.getContext() = " );
-        ArrayList<String> sss = util.toStrings(recognizer.getContext());
-        sss.forEach( (s) -> System.out.println("\t\t"+s) );
+        if ( this.verbose ) {
+            System.out.println(HDR + "recognizer.getContext() = ");
+            ArrayList<String> sss = util.toStrings(recognizer.getContext());
+            sss.forEach((s) -> System.out.println("\t\t" + s));
+        }
 
-        e.printStackTrace( System.err );
+        if ( this.verbose ) e.printStackTrace();
 
         //----------------------
         for (ParserRuleContext context = recognizer.getContext(); context != null; context = context.getParent()) {
@@ -87,15 +96,17 @@ public class BailErrorStrategy extends DefaultErrorStrategy {
         }
 
         //----------------------
-        System.err.println();
-        System.err.println( HDR + "recognizer.getContext() = " );
-        ArrayList<String> sss = util.toStrings(recognizer.getContext());
-        sss.forEach( (s) -> System.out.println("\t\t"+s) );
-        System.err.println(HDR + "topmost.getContext() = " );
-        sss = util.toStrings(topmost);
-        System.err.println(HDR + "topmost-Context = " );
+        if ( this.verbose ) {
+            System.out.println();
+            System.out.println(HDR + "recognizer.getContext() = ");
+            ArrayList<String> sss = util.toStrings(recognizer.getContext());
+            sss.forEach((s) -> System.out.println("\t\t" + s));
+            System.out.println(HDR + "topmost.getContext() = ");
+            sss = util.toStrings(topmost);
+            System.out.println(HDR + "topmost-Context = ");
+        }
 
-        e.printStackTrace( System.err );
+        if ( this.verbose ) e.printStackTrace();
 
         //----------------------
         throw new ParseCancellationException(e);
