@@ -109,9 +109,9 @@ batchFilePath : FILEPATH_ATPREFIX | FILEPATH;
 //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 //=================================================================================
 
-newcontent : (  FILEPATH_ATPREFIX | any_quoted_text   ) ; // inlinejson
+newcontent : (  FILEPATH_ATPREFIX | any_quoted_text | IN_MEMORY_LABEL  ) ; // inlinejson
 
-macroProperties : INLINEPROPERTIES | AT FILEPATH ;
+macroProperties : INLINEPROPERTIES | FILEPATH_ATPREFIX ;
 
 columnslist : SINGLEQUOTEDTEXT | DOUBLEQUOTEDTEXT | ANYWORD ;
             // Attention: Ensure the list of EXPLICIT single-chars above, matches the list for Parser's delimiter_char
