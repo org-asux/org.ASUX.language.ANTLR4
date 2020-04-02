@@ -1,7 +1,10 @@
 yaml read '/reg/"exp"/g' -p .. --verbose --delimiter , --showStats -v < /file/name > path.to/file ;
 --verbose --yamllibrary SnakeYAML yaml read paths,/pet --verbose --delimiter , --inputfile inputs/nano.yaml -o - ;
 yaml list *,**,[1],schema --delimiter "JUNKSTR" -d "/" --yamllibrary SnakeYAML --single-quote -i /file/name --outputfile path.to/file ;
-yaml  replace 'paths,/pet,put,parameters,[13],in' "replaced text by asux.js" --delimiter ,  --double-quote --showStats --inputfile inputs/my-petstore-micro.yaml  -o - ;
-yaml  delete 'paths,/pet,put,parameters,[13],in' --delimiter ,  --showStats --inputfile inputs/my-petstore-micro.yaml -o - ;
-yaml  table 'paths,/pet,put,parameters' '../operationId,name,type,schema/ref' --showStats --delimiter , --no-quote --inputfile inputs/my-petstore-micro.yaml  -o - ;
-yaml  macroyaml "UNKNOWN=value;KEY2=VALUE222" --double-quote  --inputfile inputs/nano.yaml -o -
+yaml insert paths,/pet,put,consumes @inputs/simpleSequence.yaml --delimiter , --no-quote -i - -o - ;
+yaml insert MyRootELEMENT '{State: "available", Messages: ["A","B","C"], RegionName: "eu-north-1", ZoneName: "eu-north-1c", ZoneId: "eun1-az3"}'  -i - -o - ;
+yaml replace 'paths,/pet,put,parameters,[13],in' "replaced text by asux.js" --delimiter ,  --double-quote --showStats --inputfile inputs/my-petstore-micro.yaml  -o - ;
+yaml delete 'paths,/pet,put,parameters,[13],in' --delimiter ,  --showStats --inputfile inputs/my-petstore-micro.yaml -o - ;
+yaml table 'paths,/pet,put,parameters' '../operationId,name,type,schema/ref' --showStats --delimiter , --no-quote --inputfile inputs/my-petstore-micro.yaml  -o - ;
+yaml macroyaml "UNKNOWN=value;KEY2=VALUE222" --double-quote  --inputfile inputs/nano.yaml -o - ;
+--verbose yaml batch @test/insertReplaceBatch.txt --double-quote --inputfile /dev/null -o -
