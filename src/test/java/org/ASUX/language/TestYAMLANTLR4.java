@@ -170,7 +170,7 @@ public class TestYAMLANTLR4 {
             // See HOWTO Details @ https://stackoverflow.com/questions/18782388/antlr4-lexer-error-reporting-length-of-offending-characters
 
             // 1st for Lexical Error handling
-            defaultParser.setErrorHandler( new BailErrorStrategy() );
+            defaultParser.setErrorHandler( new BailErrorStrategy( this.verbose ) );
             // With BailErrorStrategy, at the first ___Lexical___ Error, both parser & lexer stop.
             // Example Output seen on error:
             //      line 1:10 no viable alternative at input '--sfakdhasdf'
