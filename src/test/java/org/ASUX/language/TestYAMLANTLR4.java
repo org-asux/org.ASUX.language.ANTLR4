@@ -36,6 +36,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assume.assumeFalse;
 import static org.junit.Assume.assumeTrue;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -255,7 +256,9 @@ public class TestYAMLANTLR4 {
                         // assertTrue( YAMLANTLR4Lexer.REG ULAR EXP RESSION == commonTokenStream.get( tokenNum++ ).getType() ); // no longer have such a token.  Instead it's a parser element.
                         assertEquals(YAMLANTLR4Lexer.SINGLEDOUBLEQUOTEDTEXT, commonTokenStream.get(tokenNum++).getType());
                         assertEquals(YAMLANTLR4Lexer.PROJECT,           commonTokenStream.get(tokenNum++).getType());
-                        assertEquals(YAMLANTLR4Lexer.ANYWORD,           commonTokenStream.get(tokenNum++).getType());
+                        // assertEquals(YAMLANTLR4Lexer.ANYWORD,           commonTokenStream.get(tokenNum++).getType());
+                        int tkn = commonTokenStream.get(tokenNum++).getType();
+                        assertTrue( tkn == YAMLANTLR4Lexer.SIMPLEWORD || tkn == YAMLANTLR4Lexer.ANYWORD );
                         assertEquals(YAMLANTLR4Lexer.VERBOSE,           commonTokenStream.get(tokenNum++).getType());
                         assertEquals(YAMLANTLR4Lexer.DELIMITER_OPT,     commonTokenStream.get(tokenNum++).getType());
                         assertEquals(YAMLANTLR4Lexer.COMMA,             commonTokenStream.get(tokenNum++).getType());
@@ -357,61 +360,67 @@ public class TestYAMLANTLR4 {
                     //=================================================================
 // !!!!!!!!!!!!! ATTENTION !!!!!!!!!!!!!!!!!!!!!
 // The XPath will MATCH __ALL__ the YAML commands in the file!!!!!
-                    final java.util.Collection<ParseTree> xpathQRes = org.antlr.v4.runtime.tree.xpath.XPath.findAll( topmostCtx, "//yaml_command/*/optionals", defaultParser );
-                    if ( this.verbose ) xpathQRes.forEach( ptree -> System.out.println( HDR + "#2(XPath.findAll) //yaml_command/*/optionals >> "+ ptree.getText() ) );
-                    // XPATH-EXAMPLE = //'return'   :means: any 'return' literal in tree
-                    // XPATH-EXAMPLE = /prog/func/!'myvalue'     :means: any literal other than 'myvalue'.. under func, which is under prog.
-                    java.util.Iterator<ParseTree> iterator = xpathQRes.iterator();
-                    String usersInput;
-                    while ( iterator.hasNext() ) { // see output of this While Loop at the end of this block!!!!!!!!!!!!!!!!!!!!!!!!!
-                        usersInput = iterator.next().getText();
-                        if (this.verbose)  System.out.println(HDR + "org.antlr.v4.runtime.tree.xpath.XPath.findAll(verbose/delimiter/showStats): usersInput identified as = [" + usersInput + "]");
-                        if ( usersInput != null && usersInput.trim().length() != 0 ) {
-                            assertTrue( "--verbose--delimiter,--showStats-v".equals( usersInput )
-                                    || "--verbose--yamllibrarySnakeYAML".equals( usersInput )
-                                    || "--verbose--delimiter,".equals( usersInput )
-                                    || "--delimiter\"JUNKSTR\"-d\"/\"--yamllibrarySnakeYAML'".equals( usersInput )
-                                    ); // <<----------- !!!!!!!!!!!!!!!!  The test !!!!!!!!!!!!
-// !!!!!!!!!!!!! Attention: the above asse rtTrue() must address __ALL__ the input lines (even tho' we're iterating over each line.  Reason: XPATH does Not work that way!!!
-                        } // if
-                    } // while
-// org.ASUX.language.TestYAMLANTLR4.testYAMLCommands():	org.antlr.v4.runtime.tree.xpath.XPath.findAll(verbose/delimiter/showStats): usersInput identified as = []
-// org.ASUX.language.TestYAMLANTLR4.testYAMLCommands():	org.antlr.v4.runtime.tree.xpath.XPath.findAll(verbose/delimiter/showStats): usersInput identified as = []
-// org.ASUX.language.TestYAMLANTLR4.testYAMLCommands():	org.antlr.v4.runtime.tree.xpath.XPath.findAll(verbose/delimiter/showStats): usersInput identified as = []
-// org.ASUX.language.TestYAMLANTLR4.testYAMLCommands():	org.antlr.v4.runtime.tree.xpath.XPath.findAll(verbose/delimiter/showStats): usersInput identified as = [--verbose--delimiter"/"--showStats-v]
-// org.ASUX.language.TestYAMLANTLR4.testYAMLCommands():	org.antlr.v4.runtime.tree.xpath.XPath.findAll(verbose/delimiter/showStats): usersInput identified as = []
-// org.ASUX.language.TestYAMLANTLR4.testYAMLCommands():	org.antlr.v4.runtime.tree.xpath.XPath.findAll(verbose/delimiter/showStats): usersInput identified as = []
-// org.ASUX.language.TestYAMLANTLR4.testYAMLCommands():	org.antlr.v4.runtime.tree.xpath.XPath.findAll(verbose/delimiter/showStats): usersInput identified as = []
-// org.ASUX.language.TestYAMLANTLR4.testYAMLCommands():	org.antlr.v4.runtime.tree.xpath.XPath.findAll(verbose/delimiter/showStats): usersInput identified as = []
-// org.ASUX.language.TestYAMLANTLR4.testYAMLCommands():	org.antlr.v4.runtime.tree.xpath.XPath.findAll(verbose/delimiter/showStats): usersInput identified as = [--delimiter"JUNKSTR"-d"/"--yamllibrarySnakeYAML']
-// org.ASUX.language.TestYAMLANTLR4.testYAMLCommands():	org.antlr.v4.runtime.tree.xpath.XPath.findAll(verbose/delimiter/showStats): usersInput identified as = []
-// org.ASUX.language.TestYAMLANTLR4.testYAMLCommands():	Accurately verified code-exception-logic - that Read-CMd has NO YAML-Implementation cmdline options
+// and .. as you loop over each YAML command, the following code produces EXACT SAME OUTPUT in each iteration.
+// So, wrapping the code with an IF condition.
+                    if ( lineNum == 1 ) { // 1st test-input LINE only
+                        final java.util.Collection<ParseTree> xpathQRes = org.antlr.v4.runtime.tree.xpath.XPath.findAll(topmostCtx, "//yaml_command/*/optionals", defaultParser);
+                        if (this.verbose)
+                            xpathQRes.forEach(ptree -> System.out.println(HDR + "#2(XPath.findAll) //yaml_command/*/optionals >> " + ptree.getText()));
+                        // XPATH-EXAMPLE = //'return'   :means: any 'return' literal in tree
+                        // XPATH-EXAMPLE = /prog/func/!'myvalue'     :means: any literal other than 'myvalue'.. under func, which is under prog.
+                        java.util.Iterator<ParseTree> iterator = xpathQRes.iterator();
+                        String usersInput;
+                        while (iterator.hasNext()) { // see output of this While Loop at the end of this block!!!!!!!!!!!!!!!!!!!!!!!!!
+                            usersInput = iterator.next().getText();
+                            if (this.verbose)
+                                System.out.println(HDR + "org.antlr.v4.runtime.tree.xpath.XPath.findAll(verbose/delimiter/showStats): usersInput identified as = [" + usersInput + "]");
+                            //                         if ( usersInput != null && usersInput.trim().length() != 0 ) {
+                            //                             assertTrue( "--verbose--delimiter,--showStats-v".equals( usersInput )
+                            //                                     || "--verbose--yamllibrarySnakeYAML".equals( usersInput )
+                            //                                     || "--verbose--delimiter,".equals( usersInput )
+                            //                                     || "--delimiter\"JUNKSTR\"-d\"/\"--yamllibrarySnakeYAML'".equals( usersInput )
+                            //                                     ); // <<----------- !!!!!!!!!!!!!!!!  The test !!!!!!!!!!!!
+                            // // !!!!!!!!!!!!! Attention: the above asse rtTrue() must address __ALL__ the input lines (even tho' we're iterating over each line.  Reason: XPATH does Not work that way!!!
+                            //                         } // if
+                        } // while
+                    } // IF lineNum == 1
+// org.antlr.v4.runtime.tree.xpath.XPath.findAll(verbose/delimiter/showStats): usersInput identified as = []
+// org.antlr.v4.runtime.tree.xpath.XPath.findAll(verbose/delimiter/showStats): usersInput identified as = []
+// org.antlr.v4.runtime.tree.xpath.XPath.findAll(verbose/delimiter/showStats): usersInput identified as = []
+// org.antlr.v4.runtime.tree.xpath.XPath.findAll(verbose/delimiter/showStats): usersInput identified as = [--verbose--delimiter,--showStats-v]
+// org.antlr.v4.runtime.tree.xpath.XPath.findAll(verbose/delimiter/showStats): usersInput identified as = []
+// org.antlr.v4.runtime.tree.xpath.XPath.findAll(verbose/delimiter/showStats): usersInput identified as = [--verbose--yamllibrarySnakeYAML]
+// org.antlr.v4.runtime.tree.xpath.XPath.findAll(verbose/delimiter/showStats): usersInput identified as = []
+// org.antlr.v4.runtime.tree.xpath.XPath.findAll(verbose/delimiter/showStats): usersInput identified as = []
+// org.antlr.v4.runtime.tree.xpath.XPath.findAll(verbose/delimiter/showStats): usersInput identified as = [--verbose--delimiter,]
+// org.antlr.v4.runtime.tree.xpath.XPath.findAll(verbose/delimiter/showStats): usersInput identified as = []
+// org.antlr.v4.runtime.tree.xpath.XPath.findAll(verbose/delimiter/showStats): usersInput identified as = []
+// org.antlr.v4.runtime.tree.xpath.XPath.findAll(verbose/delimiter/showStats): usersInput identified as = []
+// org.antlr.v4.runtime.tree.xpath.XPath.findAll(verbose/delimiter/showStats): usersInput identified as = []
+// org.antlr.v4.runtime.tree.xpath.XPath.findAll(verbose/delimiter/showStats): usersInput identified as = [--delimiter"JUNKSTR"-d"/"--yamllibrarySnakeYAML']
+// org.antlr.v4.runtime.tree.xpath.XPath.findAll(verbose/delimiter/showStats): usersInput identified as = []
+// org.antlr.v4.runtime.tree.xpath.XPath.findAll(verbose/delimiter/showStats): usersInput identified as = []
+// org.antlr.v4.runtime.tree.xpath.XPath.findAll(verbose/delimiter/showStats): usersInput identified as = []
+// org.antlr.v4.runtime.tree.xpath.XPath.findAll(verbose/delimiter/showStats): usersInput identified as = []
+// org.antlr.v4.runtime.tree.xpath.XPath.findAll(verbose/delimiter/showStats): usersInput identified as = [--delimiter,"--showStats]
+// org.antlr.v4.runtime.tree.xpath.XPath.findAll(verbose/delimiter/showStats): usersInput identified as = []
+// org.antlr.v4.runtime.tree.xpath.XPath.findAll(verbose/delimiter/showStats): usersInput identified as = []
+// org.antlr.v4.runtime.tree.xpath.XPath.findAll(verbose/delimiter/showStats): usersInput identified as = []
+// org.antlr.v4.runtime.tree.xpath.XPath.findAll(verbose/delimiter/showStats): usersInput identified as = []
+// org.antlr.v4.runtime.tree.xpath.XPath.findAll(verbose/delimiter/showStats): usersInput identified as = [--delimiter,--showStats]
+// org.antlr.v4.runtime.tree.xpath.XPath.findAll(verbose/delimiter/showStats): usersInput identified as = []
+// org.antlr.v4.runtime.tree.xpath.XPath.findAll(verbose/delimiter/showStats): usersInput identified as = []
+// org.antlr.v4.runtime.tree.xpath.XPath.findAll(verbose/delimiter/showStats): usersInput identified as = []
+// org.antlr.v4.runtime.tree.xpath.XPath.findAll(verbose/delimiter/showStats): usersInput identified as = []
+// org.antlr.v4.runtime.tree.xpath.XPath.findAll(verbose/delimiter/showStats): usersInput identified as = [--showStats--delimiter,]
+// org.antlr.v4.runtime.tree.xpath.XPath.findAll(verbose/delimiter/showStats): usersInput identified as = []
+// org.antlr.v4.runtime.tree.xpath.XPath.findAll(verbose/delimiter/showStats): usersInput identified as = []
+// org.antlr.v4.runtime.tree.xpath.XPath.findAll(verbose/delimiter/showStats): usersInput identified as = []
+// org.antlr.v4.runtime.tree.xpath.XPath.findAll(verbose/delimiter/showStats): usersInput identified as = []
+// org.antlr.v4.runtime.tree.xpath.XPath.findAll(verbose/delimiter/showStats): usersInput identified as = ["]
+// org.antlr.v4.runtime.tree.xpath.XPath.findAll(verbose/delimiter/showStats): usersInput identified as = []
 
-
-                    // iterator.hasNext();
-                    // usersInput = iterator.next().getText();
-                    // if (this.verbose)  System.out.println(HDR + "org.antlr.v4.runtime.tree.xpath.XPath.findAll(verbose/delimiter/showStats): usersInput identified as = [" + usersInput + "]");
-                    // iterator.hasNext();
-                    // usersInput = iterator.next().getText();
-                    // if (this.verbose)  System.out.println(HDR + "org.antlr.v4.runtime.tree.xpath.XPath.findAll(verbose/delimiter/showStats): usersInput identified as = [" + usersInput + "]");
-                    // iterator.hasNext();
-                    // usersInput = iterator.next().getText();
-                    // if (this.verbose)  System.out.println(HDR + "org.antlr.v4.runtime.tree.xpath.XPath.findAll(verbose/delimiter/showStats): usersInput identified as = [" + usersInput + "]");
                     // assertTrue( "--verbose--delimiter\"/\"--showStats-v".equals( usersInput ) ); // <<----------- !!!!!!!!!!!!!!!!  The test !!!!!!!!!!!!
-                    // iterator.hasNext();
-                    // usersInput = iterator.next().getText();
-                    // if (this.verbose)  System.out.println(HDR + "org.antlr.v4.runtime.tree.xpath.XPath.findAll(verbose/delimiter/showStats): usersInput identified as = [" + usersInput + "]");
-                    //
-                    // iterator.hasNext();
-                    // usersInput = iterator.next().getText();
-                    // if (this.verbose)  System.out.println(HDR + "org.antlr.v4.runtime.tree.xpath.XPath.findAll(delimiter/JUNKSTR/yamllibrarySnakeYAML): usersInput identified as = [" + usersInput + "]");
-                    // iterator.hasNext();
-                    // usersInput = iterator.next().getText();
-                    // if (this.verbose)  System.out.println(HDR + "org.antlr.v4.runtime.tree.xpath.XPath.findAll(delimiter/JUNKSTR/yamllibrarySnakeYAML): usersInput identified as = [" + usersInput + "]");
-                    // iterator.hasNext();
-                    // usersInput = iterator.next().getText();
-                    // if (this.verbose)  System.out.println(HDR + "org.antlr.v4.runtime.tree.xpath.XPath.findAll(delimiter/JUNKSTR/yamllibrarySnakeYAML): usersInput identified as = [" + usersInput + "]");
-                    //
                     // assertTrue( "--delimiter\"JUNKSTR\"-d\"/\"--yamllibrarySnakeYAML'".equals( usersInput ) ); // <<----------- !!!!!!!!!!!!!!!!  The test !!!!!!!!!!!!
 
                     //=================================================================
@@ -632,6 +641,7 @@ public class TestYAMLANTLR4 {
                     
                     continue; // !!!!!!!!!!!!!!!!! VERY IMPORTANT !!!!!!!!!!!!!!!!  .. .. as we are UNABLE to rely on a SWITCH-statement.
                 }
+
                 final YAMLANTLR4Parser.Yaml_command_macroContext   macroCtx = eachCmdCtx.yaml_command_macro();
                 if ( macroCtx != null )  {
                     if ( this.verbose ) System.out.println( HDR + " yaml MACRO command detected!" );
@@ -639,7 +649,15 @@ public class TestYAMLANTLR4 {
                     continue; // !!!!!!!!!!!!!!!!! VERY IMPORTANT !!!!!!!!!!!!!!!!  .. .. as we are UNABLE to rely on a SWITCH-statement.
                 }
 
+                final YAMLANTLR4Parser.Yaml_command_batchContext   batchCtx = eachCmdCtx.yaml_command_batch();
+                if ( batchCtx != null )  {
+                    if ( this.verbose ) System.out.println( HDR + " yaml BATCH command detected!" );
+
+                    continue; // !!!!!!!!!!!!!!!!! VERY IMPORTANT !!!!!!!!!!!!!!!!  .. .. as we are UNABLE to rely on a SWITCH-statement.
+                }
+
                 if ( this.verbose ) System.out.println( HDR + "!!!!!!!!!!!! oh! oh! oh! oh! __UNKNOWN__ command detected!" );
+                fail();
 
             } // for loop
 
