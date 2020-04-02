@@ -12,10 +12,9 @@ public interface CmdLineArgs {
     //=================================================================================
 
     /**
-     * Given the original object of this class, copy these attributes to the 2nd object of this class.  Classes implementing this interface will know what instance-variables to copy.
+     * Given a different  object of this class, copy it's attributes into this object.  Classes implementing this interface will know what instance-variables to copy.
      * @param _orig a NotNull reference
-     * @param _copy a NotNull reference
      */
-    public void copyBasicFlags( final CmdLineArgs _orig, final CmdLineArgs _copy );
+    public void copyBasicFlags( final CmdLineArgs _orig );
 
 }
