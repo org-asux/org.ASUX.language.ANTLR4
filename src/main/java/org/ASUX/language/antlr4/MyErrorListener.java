@@ -112,6 +112,8 @@ public class MyErrorListener extends BaseErrorListener // org.antlr.v4.runtime.B
         if ( _offendingSymbol instanceof CommonToken ) {
             final CommonToken token = (CommonToken) _offendingSymbol;
             // token.getText();      // see https://github.com/antlr/antlr4/blob/master/doc/faq/parse-trees.md#how-do-i-get-the-input-text-for-a-parse-tree-subtree
+
+            // !!!!!!!!!!!!! ATTENTION !!!!!!!!!!! This method will NOT be invoked .. if you are using BailErrorStrategy.java
             final String tokensSuccessfullyParsedSoFar = "<incomplete-code>"; // myParseListener.getTokensSuccessfullyParsedSoFar();
             System.err.println( "Error: Unexpected '"+ token.getText() +"' noted after: "+ tokensSuccessfullyParsedSoFar );
             this.offendingSymbol = token.getText();
