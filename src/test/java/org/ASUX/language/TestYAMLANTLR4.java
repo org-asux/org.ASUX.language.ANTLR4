@@ -619,32 +619,70 @@ public class TestYAMLANTLR4 {
                     // // assertTrue( YAMLANTLR4Lexer.NEWLINE    == commonTokenStream.get( tokenNum++ ).getType() );
                     // assertTrue( YAMLANTLR4Lexer.EOF           == commonTokenStream.get( tokenNum++ ).getType() );
                     if ( this.verbose ) System.out.println( HDR + "tblCtx ="+ tblCtx );
+                    final YAMLANTLR4Parser.RegularexpressionContext regExpCtx = tblCtx.regularexpression();
+                    YAMLANTLR4Parser.ColumnslistContext columnsList = tblCtx.columnslist();
+                    if ( this.verbose ) System.out.println( HDR + "TABLE-YAML's REGEXPstring(from PARSER) =["+ regExpCtx.getText() +"] columnsList = ["+ columnsList.getText() +"]" );
+                    assertEquals( "'paths,/pet,put,parameters'", regExpCtx.getText() );
+                    assertEquals( "'../operationId,name,type,schema/ref'", columnsList.getText() );
+
+                    final String inputSrc   = tblCtx.inputSrc.getText();   // commonTokenStream.get( regExpPos + ?? ).getText();
+                    final String outputSink = tblCtx.outputSink.getText(); // commonTokenStream.get( regExpPos + ?? ).getText();
+                    if ( this.verbose ) System.out.println( HDR + "TABLE-YAML's InputSOURCE =["+ inputSrc +"] OutputSink=["+ outputSink +"]" );
+                    assertTrue( "inputs/my-petstore-micro.yaml".equals(inputSrc) );
+                    assertTrue( "-".equals(outputSink) );
 
                     continue; // !!!!!!!!!!!!!!!!! VERY IMPORTANT !!!!!!!!!!!!!!!!  .. .. as we are UNABLE to rely on a SWITCH-statement.
                 }
 
-                final YAMLANTLR4Parser.Yaml_command_deleteContext  deleteCtx = eachCmdCtx.yaml_command_delete();
-                if ( deleteCtx != null ) {
-                    if ( this.verbose ) System.out.println( HDR + " yaml DELETE command detected!" );
-                    
+                final YAMLANTLR4Parser.Yaml_command_insertContext  insertCtx = eachCmdCtx.yaml_command_insert();
+                if ( insertCtx != null )  {
+                    if ( this.verbose ) System.out.println( HDR + " yaml INSERT command detected!" );
+                    final YAMLANTLR4Parser.RegularexpressionContext regExpCtx = insertCtx.regularexpression();
+                    final YAMLANTLR4Parser.NewcontentContext newContent = insertCtx.newcontent();
+                    final String reText = regExpCtx.getText();
+                    final String text = newContent.getText();
+                    if ( this.verbose ) System.out.println( HDR + "INSERT-YAML's REGEXPstring(from PARSER) =["+ reText +"] newContent = ["+ text +"]" );
+                    assertTrue( "paths,/pet,put,consumes".equals(reText) || "MyRootELEMENT".equals(reText) );
+                    assertTrue( "@inputs/simpleSequence.yaml".equals(text) || "!AdditionalRootElement".equals(text) || "'{State: \"available\", Messages: [\"A\",\"B\",\"C\"], RegionName: \"eu-north-1\", ZoneName: \"eu-north-1c\", ZoneId: \"eun1-az3\"}'".equals(text) );
+
                     continue; // !!!!!!!!!!!!!!!!! VERY IMPORTANT !!!!!!!!!!!!!!!!  .. .. as we are UNABLE to rely on a SWITCH-statement.
                 }
                 final YAMLANTLR4Parser.Yaml_command_replaceContext replaceCtx = eachCmdCtx.yaml_command_replace();
                 if ( replaceCtx != null ) {
                     if ( this.verbose ) System.out.println( HDR + " yaml REPLACE command detected!" );
-                    
+
+                    final YAMLANTLR4Parser.RegularexpressionContext regExpCtx = replaceCtx.regularexpression();
+                    final YAMLANTLR4Parser.NewcontentContext newContent = replaceCtx.newcontent();
+                    final String reText = regExpCtx.getText();
+                    final String text = newContent.getText();
+                    if ( this.verbose ) System.out.println( HDR + "REPLACE-YAML's REGEXPstring(from PARSER) =["+ reText +"] newContent = ["+ text +"]" );
+                    assertEquals( "'paths,/pet,put,parameters,[13],in'" , reText );
+                    assertEquals( "\"replaced text by asux.js\"", text );
+
                     continue; // !!!!!!!!!!!!!!!!! VERY IMPORTANT !!!!!!!!!!!!!!!!  .. .. as we are UNABLE to rely on a SWITCH-statement.
                 }
-                final YAMLANTLR4Parser.Yaml_command_insertContext  insertCtx = eachCmdCtx.yaml_command_insert();
-                if ( insertCtx != null )  {
-                    if ( this.verbose ) System.out.println( HDR + " yaml INSERT command detected!" );
-                    
+                final YAMLANTLR4Parser.Yaml_command_deleteContext  deleteCtx = eachCmdCtx.yaml_command_delete();
+                if ( deleteCtx != null ) {
+                    if ( this.verbose ) System.out.println( HDR + " yaml DELETE command detected!" );
+                    final YAMLANTLR4Parser.RegularexpressionContext regExpCtx = deleteCtx.regularexpression();
+                    if ( this.verbose ) System.out.println( HDR + "TABLE-YAML's REGEXPstring(from PARSER) =["+ regExpCtx.getText() +"]" );
+                    assertEquals( "'paths,/pet,put,parameters,[13],in'", regExpCtx.getText() );
+
+                    final String inputSrc   = deleteCtx.inputSrc.getText();   // commonTokenStream.get( regExpPos + ?? ).getText();
+                    final String outputSink = deleteCtx.outputSink.getText(); // commonTokenStream.get( regExpPos + ?? ).getText();
+                    if ( this.verbose ) System.out.println( HDR + "TABLE-YAML's InputSOURCE =["+ inputSrc +"] OutputSink=["+ outputSink +"]" );
+                    assertTrue( "/tmp/inputs/my-petstore-micro.yaml".equals(inputSrc) );
+                    assertTrue( "-".equals(outputSink) );
+
                     continue; // !!!!!!!!!!!!!!!!! VERY IMPORTANT !!!!!!!!!!!!!!!!  .. .. as we are UNABLE to rely on a SWITCH-statement.
                 }
 
                 final YAMLANTLR4Parser.Yaml_command_macroContext   macroCtx = eachCmdCtx.yaml_command_macro();
                 if ( macroCtx != null )  {
                     if ( this.verbose ) System.out.println( HDR + " yaml MACRO command detected!" );
+                    final YAMLANTLR4Parser.MacroPropertiesContext mcrPropCtx = macroCtx.macroProperties();
+                    if ( this.verbose ) System.out.println( HDR + "MACRO-YAML's MacroProperties(from PARSER) =["+ mcrPropCtx.getText() +"]" );
+                    assertTrue( "\"UNKNOWN=value;KEY2=VALUE222\"".equals( mcrPropCtx.getText() )  ||  "@inputs/props.txt".equals( mcrPropCtx.getText() ) );
 
                     continue; // !!!!!!!!!!!!!!!!! VERY IMPORTANT !!!!!!!!!!!!!!!!  .. .. as we are UNABLE to rely on a SWITCH-statement.
                 }
@@ -652,6 +690,10 @@ public class TestYAMLANTLR4 {
                 final YAMLANTLR4Parser.Yaml_command_batchContext   batchCtx = eachCmdCtx.yaml_command_batch();
                 if ( batchCtx != null )  {
                     if ( this.verbose ) System.out.println( HDR + " yaml BATCH command detected!" );
+                    final YAMLANTLR4Parser.BatchFilePathContext batchFilePathContext = batchCtx.batchFilePath();
+                    final String text = batchFilePathContext.getText();
+                    if ( this.verbose ) System.out.println( HDR + "BATCH-YAML's MacroProperties(from PARSER) =["+ text +"]" );
+                    assertTrue( "@test/insertReplaceBatch.txt".equals( text )  ||  "@insertReplaceBatch.txt".equals( text ) );
 
                     continue; // !!!!!!!!!!!!!!!!! VERY IMPORTANT !!!!!!!!!!!!!!!!  .. .. as we are UNABLE to rely on a SWITCH-statement.
                 }
