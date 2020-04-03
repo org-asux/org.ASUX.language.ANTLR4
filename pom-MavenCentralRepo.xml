@@ -70,10 +70,10 @@
         <!-- @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ -->
 
 	<dependencies>
-        <dependency>
-            <groupId>org.asux</groupId>
-            <artifactId>common</artifactId>
-        </dependency>
+        <!--<dependency>-->
+        <!--    <groupId>org.asux</groupId>-->
+        <!--    <artifactId>common</artifactId>-->
+        <!--</dependency>-->
         <!-- https://tomassetti.me/domain-specific-languages/#textual_languages -->
         <!-- /htdocs/Manuals/GNU-OSS-FOSS/ANTLR_Mega_Tutorial.pdf -->
         <!-- https://mvnrepository.com/artifact/org.antlr/antlr4 -->
