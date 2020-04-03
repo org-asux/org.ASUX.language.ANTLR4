@@ -41,4 +41,8 @@ public class MyYAMLANTLR4Lexer extends YAMLANTLR4Lexer {
         this.lastTokenString = token.getText();
     }
 
+    public int getLastTokenID() { return this.lastTokenID; }
+
+    public String getLastTokenString() { return this.lastTokenString; }
+
 } // class
