@@ -36,8 +36,8 @@ endif
 ###============================================
 
 echo \
-mvn clean antlr4:antlr4 compiler:compile compiler:testCompile test
-mvn clean antlr4:antlr4 compiler:compile compiler:testCompile test
+mvn clean antlr4:antlr4 compiler:compile compiler:testCompile
+mvn clean antlr4:antlr4 compiler:compile compiler:testCompile
 
 ###----------------------------
 if ( $?VERBOSE) ls -lad ${BUILDROOT}/surefire-reports/.
