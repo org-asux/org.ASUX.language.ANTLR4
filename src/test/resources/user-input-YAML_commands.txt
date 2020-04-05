@@ -10,4 +10,6 @@ yaml table 'paths,/pet,put,parameters' '../operationId,name,type,schema/ref' --s
 yaml macroyaml "UNKNOWN=value;KEY2=VALUE222" --double-quote  --inputfile inputs/nano.yaml -o - ;
 yaml macroyaml @inputs/props.txt --inputfile inputs/nano.yaml -o - ;
 --verbose yaml batch @test/insertReplaceBatch.txt --double-quote --inputfile /dev/null -o - ;
---yamllibrary NodeImpl yaml batch @insertReplaceBatch.txt --double-quote --inputfile /dev/null -o -
+--yamllibrary NodeImpl yaml batch @insertReplaceBatch.txt --double-quote --inputfile /dev/null -o - ;
+yaml batch 'print 123' --double-quote --inputfile /dev/null -o - ;
+yaml batch 'useAsInput "[]"; print before FOREACH \n; foreach ; print INSIDE !!!!! \n ; end ; print end-of-loop.  Must see 4 lines only \n' -i /dev/null -o -
