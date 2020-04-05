@@ -103,7 +103,7 @@ regularexpression: FILEPATH | any_quoted_text | SIMPLEWORD | ( COMMA | ANYWORD |
     };
     // we need both 'BRACKETS' and "NUMBERS" in the definition as "[1]" will be parsed as 3 separate tokens as: BRACKETS NUMBER BRACKETS
 
-batchFilePath : FILEPATH_ATPREFIX | FILEPATH;
+batchFilePath : FILEPATH_ATPREFIX | FILEPATH | any_quoted_text;
 
 //=================================================================================
 //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
