@@ -692,8 +692,9 @@ public class TestYAMLANTLR4 {
                     if ( this.verbose ) System.out.println( HDR + " yaml BATCH command detected!" );
                     final YAMLANTLR4Parser.BatchFilePathContext batchFilePathContext = batchCtx.batchFilePath();
                     final String text = batchFilePathContext.getText();
-                    if ( this.verbose ) System.out.println( HDR + "BATCH-YAML's MacroProperties(from PARSER) =["+ text +"]" );
-                    assertTrue( "@test/insertReplaceBatch.txt".equals( text )  ||  "@insertReplaceBatch.txt".equals( text ) );
+                    if ( this.verbose ) System.out.println( HDR + "BATCH-YAML's Batch-Script (from PARSER) =["+ text +"]" );
+                    assertTrue( "@test/insertReplaceBatch.txt".equals( text )  ||  "@insertReplaceBatch.txt".equals( text )
+                        || "'print 123'".equals( text ) || "'useAsInput \"[]\"; print before FOREACH \\n; foreach ; print INSIDE !!!!! \\n ; end ; print end-of-loop.  Must see 4 lines only \\n'".equals( text ) );
 
                     continue; // !!!!!!!!!!!!!!!!! VERY IMPORTANT !!!!!!!!!!!!!!!!  .. .. as we are UNABLE to rely on a SWITCH-statement.
                 }
